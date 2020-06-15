@@ -3,6 +3,37 @@
 #include <spot/twa/bdddict.hh>
 
 #include "checker.h"
+#include "dbg.h"
+
+std::ostream& operator<< (std::ostream& os, const model_info& m) {
+    os  << "model_info:" << std::endl
+        << "No. States: \t" << m.States << std::endl
+        << "Initial State: \t" << m.Initial << std::endl;
+
+    os << "Symbols: \t";
+    for(auto s : m.Symbols)
+        os << s << ' ';
+
+    state i = 0;
+    os << std::endl << "Labels: \t" << i++ << ": ";
+    for(auto v : m.Labels) {
+        for(auto l : v)
+            os << l << " ";
+        if(i < m.Labels.size())
+            os << std::endl << "\t\t" << i++ << ": ";
+    }
+
+    i = 0;
+    os << std::endl << "Transitions: \t" << i++ << "-> ";
+    for(auto v : m.Transitions) {
+        for(auto t : v)
+            os << t << " ";
+        if(i < m.Transitions.size())
+        os << std::endl << "\t\t" << i++ << "-> ";
+    }
+
+   return os << std::endl;
+}
 
 Checker::Checker() {
     std::cerr << "-- create Checker" << std::endl;
@@ -39,110 +70,82 @@ spot::kripke_graph_ptr Checker::explicit_door_kripke() const {
     return k;
 }
 
+//TODO check if presizing possible in vectors (based on N_STATES)
 bool Checker::read_kripke(std::string filename, model_info& model) const {
     std::ifstream file (filename);
-    std::string line;
-    uint32_t s = 0;
 
     if (file.is_open()) {
+        std::string line;
         // read S
-
-        while(std::getline (file, line)) {
-            if(line[0] == '\n' || line[0] == '#')
-                continue;
-
-            istringstream ss(line);
-            std::string x;
-
-            switch(s) { //TODO clean up, class or more function calls
-                case 0:
-                    if(ss >> x && x == "S")
-                        if( !(ss >> model.States) ) {
-                            std::cerr << "-- ERROR: Missing value for S when reading: " << filename << std::endl;
-                            return false;
-                        }
-                    else {
-                        std::cerr << "-- ERROR: Missing line for S when reading: " << filename << std::endl;
-                        return false;
-                    }
-                    s++;
-                    break;
-
-                case 1:
-                    if(ss >> x && x == "I")
-                        if( !(ss >> model.Initial) ) {
-                            std::cerr << "-- ERROR: Missing value for I when reading: " << filename << std::endl;
-                            return false;
-                        }
-                    else {
-                        std::cerr << "-- ERROR: Missing line for I when reading: " << filename << std::endl;
-                        return false;
-                    }
-                    s++;
-                    break;
-
-                case 2:
-                    if(ss >> x && x == "P") {
-                        while(ss >> x)
-                             model.Symbols.push_back()
-
-                        if( model.Symbols.size() == 0 ) {
-                           std::cerr << "-- ERROR: Missing values for P when reading: " << filename << std::endl;
-                           return false;
-                       }
-                    }
-                    else {
-                        std::cerr << "-- ERROR: Missing line for P when reading: " << filename << std::endl;
-                        return false;
-                    }
-                    s++;
-                    break;
-
-                case 3:
-                    if(ss >> x && x == "L") {
-                        std::vector<bool> v;
-                        for(int i = 0; i < model.States; i++) {
-                            if(i > 0) {
-                                if(!std::getline(file, line)) {
-                                    std::cerr << "-- ERROR: Missing line for L when reading: " << filename << std::endl;
-                                    return false;
-                                }
-                                ss.str(line);
-                            }
-
-                            bool b;
-                            for(int j = 0; j < model.Symbols.size()) {
-                                if( !(ss >> b) ) {
-                                    std::cerr << "-- ERROR: Missing values for L when reading: " << filename << std::endl;
-                                    return false;
-                                }
-                                v.push_back(b)
-                            }
-
-                            model.Labels.push_back(v);
-                            v.clear();
-                        }
-                    } else {
-                        std::cerr << "-- ERROR: Missing line for L when reading: " << filename << std::endl;
-                        return false;
-                    }
-                    s++;
-                    break;
-            }
-        }
-
-        if(!(ss >> x) {
-            std::cerr << "-- ERROR: Missing line when reading S from: " << filename << std::endl;
+        if(!std::getline (file, line)) {
+            std::cerr << "-- ERROR: Missing line for N_States and Initial_State: " << filename << std::endl;
             return false;
         }
-        if(x == "S")
-            ss >> model.States;
 
+        std::istringstream ss(line); std::string x;
 
+        if(ss >> model.States >> model.Initial) {
+            //Read Symbols
+            if(!std::getline (file, line)) {
+                std::cerr << "-- ERROR: Missing line for Symbols: " << filename << std::endl;
+                return false;
+            }
+            ss.clear();
+            ss.str(line);
 
-        myfile.close();
+            while(ss >> x)
+                model.Symbols.push_back(x);
+
+            if(model.Symbols.size() == 0) {
+                std::cerr << "-- ERROR: Missing values for Symbols: " << filename << std::endl;
+                return false;
+            }
+
+            //Read Labels
+            for(state i = 0; i < model.States; i++) {
+                if(!std::getline (file, line)) {
+                    std::cerr << "-- ERROR: Missing line for Labels: " << filename << std::endl;
+                    return false;
+                }
+                ss.clear();
+                ss.str(line);
+                std::vector<bool> v; bool b;
+
+                for(uint32_t j = 0; j < model.Symbols.size(); j++) {
+                    if(ss >> b)
+                        v.push_back(b);
+                    else {
+                        std::cerr << "-- ERROR: Missing values for Labels: " << filename << std::endl;
+                        return false;
+                    }
+                }
+                model.Labels.push_back(v); v.clear();
+            }
+            //Read Transitions
+            for(state i = 0; i < model.States; i++) {
+                if(!std::getline (file, line)) {
+                    std::cerr << "-- ERROR: Missing line for Transitions: " << filename << std::endl;
+                    return false;
+                }
+                ss.clear();
+                ss.str(line);
+                std::vector<state> v; state s;
+
+                while(ss >> s)
+                    v.push_back(s);
+
+                model.Transitions.push_back(v); v.clear();
+            }
+        }
+        else {
+            std::cerr << "-- ERROR: Missing values for N_States or Initial_State: " << filename << std::endl;
+            return false;
+        }
+
+        file.close();
+        return true;
     }
-    else cout << "-- ERROR: Unable to open file: " << filename << std::endl;
 
-
+    std::cout << "-- ERROR: Unable to open file: " << filename << std::endl;
+    return false;
 }

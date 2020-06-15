@@ -3,13 +3,14 @@
 
 #include <spot/kripke/kripkegraph.hh>
 
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 using kripke_ptr = spot::kripke_graph_ptr;
 using state      = uint32_t;
-
 
 struct model_info {
     state States;
@@ -18,7 +19,10 @@ struct model_info {
     std::vector<std::string>          Symbols;
     std::vector< std::vector<bool> >  Labels;
     std::vector< std::vector<state> > Transitions;
+
+    friend std::ostream& operator << (std::ostream& os, const model_info& m);
 };
+
 
 class Checker {
     public:
@@ -52,7 +56,7 @@ class Checker {
     */
 
     kripke_ptr explicit_door_kripke() const;
-    model_info read_kripke(std::string filename) const;
+    bool read_kripke(std::string filename, model_info& model) const;
 
     /* TODO Create property checks
         * Standard method for deadlocks/liveness and stuff
