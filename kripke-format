@@ -1,0 +1,20 @@
+# Kripke File format
+
+# Number of States {0, ... , S-1}
+S 3
+
+# Initial State \in {0, ... , S-1}
+I 0
+
+# Propositions
+P open pushed through
+
+# Which P hold true in each state
+L 0 0 0
+  1 1 0
+  1 1 1
+
+# To-transisions for each state \in {0, ... , S-1}
+T 0 1
+  0 1 2
+  1 2
