@@ -149,3 +149,44 @@ bool Checker::read_kripke(std::string filename, model_info& model) const {
     std::cout << "-- ERROR: Unable to open file: " << filename << std::endl;
     return false;
 }
+
+kripke_ptr Checker::make_explicit(const model_info& m) const {
+    spot::bdd_dict_ptr dict = spot::make_bdd_dict();
+    spot::kripke_graph_ptr graph = spot::make_kripke_graph(dict);
+
+    state* states = new state[m.States];
+    bdd* symbols = new bdd[m.Symbols.size()];
+
+    // Initialize symbols
+    for(uint32_t i = 0; i < m.Symbols.size(); i++)
+        symbols[i] = bdd_ithvar(graph->register_ap(m.Symbols[i]));
+
+    // Assign labels to states
+    for(state s = 0; s < m.Labels.size(); s++) {
+        auto temp = m.Labels[s][0] ? symbols[0] : !(symbols[0]);
+        
+        for(uint32_t i = 1; i < m.Labels[0].size(); i++)
+            temp &= m.Labels[s][i] ? symbols[i] : (!symbols[i]);
+
+        states[s] = graph->new_state(temp);
+    }
+
+    // Set states
+    graph->set_init_state(states[m.Initial]);
+
+    for(state from = 0; from < m.Transitions.size(); from++) {
+        for(state to : m.Transitions[from])
+            graph->new_edge(from, to);
+    }
+
+    delete[] states;
+    delete[] symbols;
+
+    //TODO add naming
+    /*
+    auto names = new std::vector<std::string> { "x0", "x1", "x2" };
+    k->set_named_prop("state-names", names);
+    */
+
+    return graph;
+}
