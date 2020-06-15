@@ -32,3 +32,5 @@
 *.app
 
 spot-check
+
+inc/dbg.h
