@@ -5,12 +5,12 @@
 
 #include <array>
 
-#define N
+const size_t N = 4;
 
 //Names of all used variables
 /* Single integers */
 enum SINGLE_VARS {  //Names for single ints
-    N,
+    N_process,
     x,
     y,
     S_COUNT  }      //Number of single variables. Keep S_COUNT last!
@@ -24,10 +24,10 @@ enum ARRAY_VARS {   //Names of integer arrays
 /* Sizes for our integer arrays */
 std::array<unsigned, A_COUNT> ARRAY_SIZE;
 ARRAY_SIZE[level]         = N;
-ARRAY_SIZE[last_to_visit] = N;
+ARRAY_SIZE[last_to_enter] = N;
 
-using variable_list = std::array<int, S_COUNT>
-using array_list    = std::array< std::vector<int>, A_COUNT >
+using variable_list = std::array<int, S_COUNT>;
+using array_list    = std::array< std::vector<int>, A_COUNT >;
 
 class MyState: public spot::state {
     private:
