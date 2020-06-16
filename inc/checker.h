@@ -56,7 +56,7 @@ class Checker {
     */
 
     // Hardcoded test
-    kripke_ptr explicit_door_kripke() const;
+    kripke_ptr  explicit_door_kripke() const;
     // Reading user input
     bool        read_kripke(std::string filename, model_info& model) const;
     kripke_ptr  make_explicit(const model_info& m) const;

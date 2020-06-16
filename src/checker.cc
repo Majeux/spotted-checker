@@ -3,7 +3,7 @@
 #include <spot/twa/bdddict.hh>
 
 #include "checker.h"
-#include "dbg.h"
+#include <dbg.h>
 
 std::ostream& operator<< (std::ostream& os, const model_info& m) {
     os  << "model_info:" << std::endl
@@ -71,6 +71,7 @@ spot::kripke_graph_ptr Checker::explicit_door_kripke() const {
 }
 
 //TODO check if presizing possible in vectors (based on N_STATES)
+// Read specification of a model from a file
 bool Checker::read_kripke(std::string filename, model_info& model) const {
     std::ifstream file (filename);
 
@@ -150,6 +151,7 @@ bool Checker::read_kripke(std::string filename, model_info& model) const {
     return false;
 }
 
+// Create a Kripke graph from a specified model using the 'Explicit' method
 kripke_ptr Checker::make_explicit(const model_info& m) const {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     spot::kripke_graph_ptr graph = spot::make_kripke_graph(dict);
@@ -164,7 +166,7 @@ kripke_ptr Checker::make_explicit(const model_info& m) const {
     // Assign labels to states
     for(state s = 0; s < m.Labels.size(); s++) {
         auto temp = m.Labels[s][0] ? symbols[0] : !(symbols[0]);
-        
+
         for(uint32_t i = 1; i < m.Labels[0].size(); i++)
             temp &= m.Labels[s][i] ? symbols[i] : (!symbols[i]);
 
