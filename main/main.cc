@@ -3,6 +3,7 @@
 #include <spot/twaalgos/dot.hh>
 
 #include "checker.h"
+#include "peterson/kripke.h"
 
 int main() {
 
