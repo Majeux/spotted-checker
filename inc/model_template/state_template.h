@@ -13,20 +13,18 @@ enum SINGLE_VARS {  //Names for single ints
     N_process,
     x,
     y,
-    S_COUNT  }      //Number of single variables. Keep S_COUNT last!
+    S_COUNT  };      //Number of single variables. Keep S_COUNT last!
 
 /* Arrays of integers*/
 enum ARRAY_VARS {   //Names of integer arrays
     level,
     last_to_visit,
-    A_COUNT  }      //Number of integer arrays. Keep Count last!
+    A_COUNT  };     //Number of integer arrays. Keep Count last!
 
 /* Sizes for our integer arrays */
-std::array<unsigned, A_COUNT> ARRAY_SIZE;
-ARRAY_SIZE[level]         = N;
-ARRAY_SIZE[last_to_enter] = N;
+std::array<size_t, A_COUNT> ARRAY_SIZE {N, N-1};
 
-using variable_list = std::array<int, S_COUNT>;
+using single_list = std::array<int, S_COUNT>;
 using array_list    = std::array< std::vector<int>, A_COUNT >;
 
 class MyState: public spot::state {
@@ -38,14 +36,14 @@ class MyState: public spot::state {
                                 //Access element 'i' in array 'NAME' with arrays[NAME][i]
 
     public:
-        my_state() {
+        MyState() {
             // Set all the sizes of all used 'arrays' (in practice vectors for generality)
             for(size_t i = 0; i < arrays.size(); i++)
                 arrays[i].resize(ARRAY_SIZE[i]);
         }
 
         MyState* clone() const override {
-            return new demo_state();
+            return new MyState();
         }
 
         size_t hash() const override {
@@ -58,8 +56,8 @@ class MyState: public spot::state {
         int compare(const spot::state* other) const override {
             auto o = static_cast<const MyState*>(other);
 
-            if(singles < o->singles) return -1; //first <
-            if(singles > o->singles) return  1; //first > --> first ==
+            if(variables < o->variables) return -1; //first <
+            if(variables > o->variables) return  1; //first > --> first ==
             if(arrays  < o->arrays)  return -1; //first ==, second <
 
             return arrays > o->arrays;        //first ==, second > or ==
