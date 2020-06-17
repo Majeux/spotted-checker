@@ -11,6 +11,7 @@ PetersonState* PetersonIterator::dst() const {
         case 0: //initialize loop
             assign_lvl.set(_i, 0);
             assign_pc.set(_i, 1);
+
             return new PetersonState(_N, pc, assign_pc,
                                          level, assign_lvl,
                                          last_to_enter);
@@ -28,6 +29,7 @@ PetersonState* PetersonIterator::dst() const {
         case 2: //loop body
             assign_lte.set(level[_i], _i);
             assign_pc.set(_i, 3);
+
             return new PetersonState(_N, pc, assign_pc,
                                          level,
                                          last_to_enter, assign_lte);
@@ -37,12 +39,14 @@ PetersonState* PetersonIterator::dst() const {
 
             assign_lvl.set(_i, level[_i] + 1);
             assign_pc.set(_i, 1);
+
             return new PetersonState(_N, pc, assign_pc,
                                          level, assign_lvl,
                                          last_to_enter);
         case 4: //critical section
             assign_lte.set(level[_i], -1);
             assign_pc.set(_i, 0);
+
             return new PetersonState(_N, pc, assign_pc,
                                          level,
                                          last_to_enter, assign_lte);

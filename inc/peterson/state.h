@@ -10,11 +10,6 @@ struct assignment {
     size_t index;
     int value;
 
-    void operator=(const assignment &a ) {
-        index = a.index;
-        value = a.value;
-    }
-
     void set(const size_t i, const int v) {
         index = i;
         value = v;
@@ -33,6 +28,8 @@ class PetersonState: public spot::state {
         std::vector<size_t> last_to_enter;
 
     public:
+        PetersonState(size_t n) : _N(n), pc(_N, 0), level(_N, 0), last_to_enter(_N-1, 0) {}
+
         PetersonState(size_t n, const std::vector<size_t> &p,
                                 const std::vector<int> &lv,
                                 const std::vector<size_t> &lte) : _N(n), pc(p), level(lv), last_to_enter(lte)
@@ -84,6 +81,11 @@ class PetersonState: public spot::state {
             // return arrays > o->arrays;        //first ==, second > or ==
             return 0;
          }
+
+         size_t getN() const { return _N; }
+         const std::vector<size_t>* getPC()  const { return &pc; }
+         const std::vector<int>*    getLVL() const { return &level; }
+         const std::vector<size_t>* getLTE() const { return &last_to_enter; }
 };
 
 #endif
