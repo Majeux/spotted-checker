@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cassert>
+#include <dbg.h>
 
 struct assignment {
     size_t index;
@@ -64,7 +65,12 @@ class PetersonState: public spot::state {
         }
 
         size_t hash() const override {
-            return reinterpret_cast<size_t>(this);
+            return  pc[0] << 8 &
+                    pc[1] << 5 &
+                    (unsigned)(level[0]+1) << 3 &
+                    (unsigned)(level[1]+1) << 1 &
+                    last_to_enter[0];
+            //return reinterpret_cast<size_t>(this);
         }
 
         // compare must impose a total order
@@ -96,7 +102,7 @@ class PetersonState: public spot::state {
              bool* in_crit = new bool[N];
 
              for(size_t i = 0; i < N; i++)
-                in_crit[i] = level[i] < 0;
+                in_crit[i] = pc[i] == 4;
 
             return in_crit;
          }

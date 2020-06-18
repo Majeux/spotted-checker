@@ -1,6 +1,8 @@
 #ifndef PETERSON_IT_H
 #define PETERSON_IT_H
 
+#include <dbg.h>
+
 #include "peterson/state.h"
 
 class PetersonIterator: public spot::kripke_succ_iterator {
@@ -23,7 +25,7 @@ class PetersonIterator: public spot::kripke_succ_iterator {
         // Set iterator, return true iff there is at least 1 successor
         bool first() override {
             assert(_N > 0);
-            _i = _N - 1;
+            _i = _N;
             return _i > 0;
         }
 

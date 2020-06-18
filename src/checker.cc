@@ -3,7 +3,6 @@
 #include <spot/twa/bdddict.hh>
 
 #include "checker.h"
-#include <dbg.h>
 
 std::ostream& operator<< (std::ostream& os, const model_info& m) {
     os  << "model_info:" << std::endl

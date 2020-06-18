@@ -7,18 +7,22 @@
 
 int main() {
 
-    Checker checker;
-    std::cerr << "Printing test kripke" << std::endl;
-    spot::print_dot(std::cout, checker.explicit_door_kripke());
+    // Checker checker;
+    // std::cerr << "Printing test kripke" << std::endl;
+    // spot::print_dot(std::cout, checker.explicit_door_kripke());
+    //
+    // std::cerr << std::endl << "Printing test kripke from file" << std::endl;
+    // model_info model;
+    //
+    // if(checker.read_kripke("kripkes/kripke-door", model))
+    //     spot::print_dot(std::cout, checker.make_explicit(model));
+    // else
+    //     std::cerr << "-- READ ERROR" << std::endl;
+    //
+    // std::cerr << std::endl << "-- done" << std::endl;
+    std::cerr << sizeof(size_t) << std::endl;
+    auto k = std::make_shared<PetersonKripke>(2, spot::make_bdd_dict());
+    spot::print_dot(std::cout, k);
 
-    std::cerr << std::endl << "Printing test kripke from file" << std::endl;
-    model_info model;
-
-    if(checker.read_kripke("kripkes/kripke-door", model))
-        spot::print_dot(std::cout, checker.make_explicit(model));
-    else
-        std::cerr << "-- READ ERROR" << std::endl;
-
-    std::cerr << std::endl << "-- done" << std::endl;
     return 1;
 }

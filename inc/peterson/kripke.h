@@ -14,8 +14,11 @@ class PetersonKripke: public spot::kripke
     {
         crit = new bdd[_N];
 
-        for(size_t i = 0; i < _N; i++)
-            crit[i] = bdd_ithvar( register_ap("crit" + ('0' + i)) );
+        for(size_t i = 0; i < _N; i++) {
+            std::string name = "crit";
+            name += '0' + i;
+            crit[i] = bdd_ithvar( register_ap(name) );
+        }
     }
 
     ~PetersonKripke() {
@@ -53,6 +56,7 @@ class PetersonKripke: public spot::kripke
         for(size_t i = 1; i < _N; i++)
             condition &= in_crit[i] ? crit[i] : !crit[i];
 
+        delete[] in_crit;
         return condition;
     }
 
@@ -60,15 +64,14 @@ class PetersonKripke: public spot::kripke
     {
         auto state = static_cast<const PetersonState*>(s);
         std::ostringstream out;
-        out << "PetersonState(\n\t"
-            << "pc = [ ";
-        for(auto i : *(state->getPC())) out << i << ' ';
+        out << "pc = [ ";
+        for(auto i : *(state->getPC())) out << i << ", ";
         out << " ]" << std::endl
             << "level = [ ";
-        for(auto i : *(state->getLVL())) out << i << ' ';
+        for(auto i : *(state->getLVL())) out << i << ", ";
         out << " ]" << std::endl
             << "last_to_enter = [ ";
-        for(auto i : *(state->getLTE())) out << i << ' ';
+        for(auto i : *(state->getLTE())) out << i << ", ";
         out << " ]" << std::endl;
 
         return out.str();
