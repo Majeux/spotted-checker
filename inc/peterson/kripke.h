@@ -8,14 +8,14 @@ class PetersonKripke: public spot::kripke
     private:
         const size_t _N;
         bdd* crit;
-
-        bdd odd_x_;
     public:
     PetersonKripke(size_t n, const spot::bdd_dict_ptr& d)
         : spot::kripke(d), _N(n)
     {
         crit = new bdd[_N];
-        odd_x_ = bdd_ithvar(register_ap("odd_x"));
+
+        for(size_t i = 0; i < _N; i++)
+            crit[i] = bdd_ithvar( register_ap("crit" + ('0' + i)) );
     }
 
     ~PetersonKripke() {
@@ -29,12 +29,12 @@ class PetersonKripke: public spot::kripke
 
     //recycling prevents delete/new overhead
     PetersonIterator* succ_iter(const spot::state* s) const override {
-        auto state = static_cast<const PetersonState*>(s);
-        bdd condition = state_condition(ss);
+        const PetersonState* state = static_cast<const PetersonState*>(s);
+        bdd condition = state_condition(state);
 
-        if(iter_cache) { //reuse old iterator if available
-            auto i = static_cast<PetersonIterator*>(iter_cache);
-            iter_cache = nullptr;
+        if(iter_cache_) { //reuse old iterator if available
+            PetersonIterator* i = static_cast<PetersonIterator*>(iter_cache_);
+            iter_cache_ = nullptr;
             i->recycle(state, condition);
 
             return i;
@@ -45,16 +45,32 @@ class PetersonKripke: public spot::kripke
 
     bdd state_condition(const spot::state* s) const override
     {
-        //TODO
-        // auto ss = static_cast<const PetersonState*>(s);
-        return odd_x_;
+        const PetersonState* state = static_cast<const PetersonState*>(s);
+
+        bool* in_crit = state->getInCrit(_N);
+        bdd condition = in_crit[0] ? crit[0] : !crit[0];
+
+        for(size_t i = 1; i < _N; i++)
+            condition &= in_crit[i] ? crit[i] : !crit[i];
+
+        return condition;
     }
 
     std::string format_state(const spot::state* s) const override
     {
-        auto ss = static_cast<const PetersonState*>(s);
+        auto state = static_cast<const PetersonState*>(s);
         std::ostringstream out;
-        // out << "(x = " << ss->get_x() << ", y = " << ss->get_y() << ')';
+        out << "PetersonState(\n\t"
+            << "pc = [ ";
+        for(auto i : *(state->getPC())) out << i << ' ';
+        out << " ]" << std::endl
+            << "level = [ ";
+        for(auto i : *(state->getLVL())) out << i << ' ';
+        out << " ]" << std::endl
+            << "last_to_enter = [ ";
+        for(auto i : *(state->getLTE())) out << i << ' ';
+        out << " ]" << std::endl;
+
         return out.str();
     }
 };

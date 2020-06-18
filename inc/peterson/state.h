@@ -70,22 +70,36 @@ class PetersonState: public spot::state {
         // compare must impose a total order
         // comparators for std::array and std::vector impose a lexographical order,
         // which is a total order if their elements (int) have a total order
+        //return -1 if *this < *other, 1 if *this > *other, 0 if *this == *other
         int compare(const spot::state* other) const override {
             auto o = static_cast<const PetersonState*>(other);
-            // assert(o != NULL);
-            //
-            // if(singles < o->singles) return -1; //first <
-            // if(singles > o->singles) return  1; //first > --> first ==
-            // if(arrays  < o->arrays)  return -1; //first ==, second <
-            //
-            // return arrays > o->arrays;        //first ==, second > or ==
-            return 0;
+            assert(o != NULL);
+
+            if(pc < o->pc) return -1;
+            if(pc > o->pc) return  1;
+            //first >< --> first ==
+            if(level < o->level)  return -1;
+            if(level > o->level)  return  1;
+            //second >< --> second ==
+            if(last_to_enter < o->last_to_enter)  return -1;
+
+            return last_to_enter > o->last_to_enter; //first ==, second ==
          }
 
          size_t getN() const { return _N; }
          const std::vector<size_t>* getPC()  const { return &pc; }
          const std::vector<int>*    getLVL() const { return &level; }
          const std::vector<size_t>* getLTE() const { return &last_to_enter; }
+
+         bool* getInCrit(size_t N) const {
+             assert(N == level.size());
+             bool* in_crit = new bool[N];
+
+             for(size_t i = 0; i < N; i++)
+                in_crit[i] = level[i] < 0;
+
+            return in_crit;
+         }
 };
 
 #endif

@@ -14,7 +14,7 @@ class PetersonIterator: public spot::kripke_succ_iterator {
         std::vector<size_t> last_to_enter;
 
     public:
-        PetersonIterator(PetersonState* s, bdd cond) :
+        PetersonIterator(const PetersonState* s, bdd cond) :
             kripke_succ_iterator(cond), _N(s->getN()),
             pc(            *(s->getPC())  ),
             level(         *(s->getLVL()) ),
