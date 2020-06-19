@@ -25,8 +25,9 @@ int main() {
     // std::cerr << std::endl << "-- done" << std::endl;
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
 
-    std::string formula = "F(crit0)";
-    // std::string formula = "G( (!crit0 && !crit1) || crit0 xor crit1)";
+    std::string formula = "wait0 -> F(crit0 && !wait0) && wait1 -> F(crit1 && !wait1) "; //starvation free: any process tthat starts waiting, gets access
+
+    // std::string formula = "G( (!crit0 && !crit1) || crit0 xor crit1)"; //mutex
 
     spot::parsed_formula pf = spot::parse_infix_psl(formula);
     spot::formula f = spot::formula::Not(pf.f);
@@ -38,7 +39,7 @@ int main() {
     else
         std::cout << formula << " verified" << std::endl;
 
-    // spot::print_dot(std::cout, k);
+    // spot::print_dot(std::cout, pk);
 
     return 1;
 }

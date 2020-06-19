@@ -7,22 +7,28 @@ class PetersonKripke: public spot::kripke
 {
     private:
         const size_t _N;
-        bdd* crit;
+        bdd* crit; //is process i < _N in critical section (for verifying mutex)
+        bdd* wait; //is process i < _N waiting to access critical section (for verifying non-starvation)
+
     public:
     PetersonKripke(size_t n, const spot::bdd_dict_ptr& d)
         : spot::kripke(d), _N(n)
     {
         crit = new bdd[_N];
+        wait = new bdd[_N];
 
         for(size_t i = 0; i < _N; i++) {
-            std::string name = "crit";
-            name += '0' + i;
-            crit[i] = bdd_ithvar( register_ap(name) );
+            std::string critical = "crit"; critical += '0' + i;
+            std::string waiting  = "wait"; waiting  += '0' + i;
+
+            crit[i] = bdd_ithvar( register_ap(critical) );
+            wait[i] = bdd_ithvar( register_ap(waiting) );
         }
     }
 
     ~PetersonKripke() {
         delete[] crit;
+        delete[] wait;
     }
 
     PetersonState* get_init_state() const override
@@ -50,14 +56,18 @@ class PetersonKripke: public spot::kripke
     {
         const PetersonState* state = static_cast<const PetersonState*>(s);
 
-        bool* in_crit = state->getInCrit(_N);
-        bdd condition = in_crit[0] ? crit[0] : !crit[0];
+        const std::vector<proc>* pc  = state->getPC();
+        const std::vector<proc>* lvl = state->getLVL();
 
-        for(size_t i = 1; i < _N; i++)
-            condition &= in_crit[i] ? crit[i] : !crit[i];
+        bdd crit_condition = (*pc)[0] == 4 ? crit[0] : !crit[0];
+        bdd wait_condition = (*lvl)[0] > -1 && (*lvl)[0] < 4 ? wait[0] : !wait[0];
 
-        delete[] in_crit;
-        return condition;
+        for(size_t i = 1; i < _N; i++) {
+            crit_condition &= (*pc)[i] == 4 ? crit[i] : !crit[i];
+            wait_condition &= (*lvl)[i] > -1 && (*lvl)[i] < 4 ? wait[i] : !wait[i];
+        }
+
+        return crit_condition & wait_condition;
     }
 
     std::string format_state(const spot::state* s) const override
@@ -69,7 +79,7 @@ class PetersonKripke: public spot::kripke
         out << " ]" << std::endl
             << "level = [ ";
         for(auto i : *(state->getLVL())) out << (long int)i << ", ";
-        out << " ]" << std::endl
+        out << " ] "
             << "last_to_enter = [ ";
         for(auto i : *(state->getLTE())) out << (long unsigned)i << ", ";
         out << " ]" << std::endl;
