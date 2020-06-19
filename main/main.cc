@@ -66,9 +66,15 @@ int main() {
     spot::twa_graph_ptr f_auto = spot::translator(dict).run(f);
 
     if(auto run = pk->intersecting_run(f_auto))
+<<<<<<< HEAD
         std::cout << f_string << " violated by: \n" << *run << std::endl << std::endl;
     else
         std::cout << "verified:\n" << f_string << std::endl <<  std::endl;
+=======
+        std::cout << f_string << " violated by: \n" << *run << std::endl;
+    else
+        std::cout << f_string << " verified" << std::endl;
+>>>>>>> 6cd94ae8b1c85466e0200cad737cb311824e0f85
 
     f_string = verify_starvation();
 
@@ -77,10 +83,16 @@ int main() {
     f_auto = spot::translator(dict).run(f);
 
     if(auto run = pk->intersecting_run(f_auto))
+<<<<<<< HEAD
         std::cout << f_string << " violated by: \n __________________"
                   << *run << std::endl << std::endl;
     else
         std::cout << "verified:\n"<< f_string << std::endl << std::endl;
+=======
+        std::cout << f_string << " violated by: \n" << *run << std::endl;
+    else
+        std::cout << f_string << " verified" << std::endl;
+>>>>>>> 6cd94ae8b1c85466e0200cad737cb311824e0f85
 
     // spot::print_dot(std::cout, pk);
 
