@@ -34,7 +34,7 @@ class PetersonState: public spot::state {
         std::vector<proc> last_to_enter;
 
     public:
-        PetersonState(proc n) : _N(n), pc(_N, 0), level(_N, 0), last_to_enter(_N-1, 0)
+        PetersonState(proc n) : _N(n), pc(_N, 0), level(_N, -1), last_to_enter(_N-1, 0)
         {}
 
         PetersonState(proc n, const std::vector<proc> &p,

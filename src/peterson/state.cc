@@ -3,15 +3,6 @@
 #define FNV_OFFSET 0xcbf29ce484222325
 #define FNV_PRIME  0x100000001b3
 
-// size_t hash() const override {
-//     return  pc[0] << 8 &
-//             pc[1] << 5 &
-//             (unsigned)(level[0]+1) << 3 &
-//             (unsigned)(level[1]+1) << 1 &
-//             last_to_enter[0];
-//     //return reinterpret_cast<proc>(this);
-// }
-
 //fnv-1a hash function, iterating over all state identifiers
 size_t PetersonState::hash() const {
     assert(sizeof(size_t)*8 == 64);
