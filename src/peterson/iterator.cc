@@ -6,11 +6,11 @@ PetersonState* PetersonIterator::dst() const {
     assert(_i <= _N);
     assert(_i > 0);
 
-    size_t i = _i - 1;
-    int l = level[i];
+    proc i = _i - 1;
+    proc l = level[i];
     //prepare search for greater level than level[i]
     auto begin = level.begin(), end = level.end();
-    auto E_greater = [=, k = size_t(0)] (int k_val) mutable {
+    auto E_greater = [=, k = proc(0)] (proc k_val) mutable {
         return k++ != i && k_val >= l;
     };
     //containers are copy constructed in PetersonState,
@@ -28,7 +28,7 @@ PetersonState* PetersonIterator::dst() const {
         case 1: //check loop bound
             assert(l >= 0);
 
-            if((size_t)l < _N - 1)
+            if(l < _N - 1)
                 assign_pc.set(i, 2);
             else
                 assign_pc.set(i, 4);
@@ -44,7 +44,7 @@ PetersonState* PetersonIterator::dst() const {
                                          level,
                                          last_to_enter, assign_lte);
         case 3: //loop wait
-            if(last_to_enter[l] == i && std::find_if(begin, end, E_greater) != end )
+            if(last_to_enter[l] == i && std::any_of(begin, end, E_greater) )
                 return new PetersonState(_N, pc, level, last_to_enter);
 
             assign_lvl.set(i, l + 1);

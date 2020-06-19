@@ -20,7 +20,7 @@ int main() {
     //     std::cerr << "-- READ ERROR" << std::endl;
     //
     // std::cerr << std::endl << "-- done" << std::endl;
-    std::cerr << sizeof(size_t) << std::endl;
+    
     auto k = std::make_shared<PetersonKripke>(2, spot::make_bdd_dict());
     spot::print_dot(std::cout, k);
 

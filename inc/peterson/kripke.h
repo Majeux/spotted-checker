@@ -65,13 +65,13 @@ class PetersonKripke: public spot::kripke
         auto state = static_cast<const PetersonState*>(s);
         std::ostringstream out;
         out << "pc = [ ";
-        for(auto i : *(state->getPC())) out << i << ", ";
+        for(auto i : *(state->getPC())) out << (long int)i << ", ";
         out << " ]" << std::endl
             << "level = [ ";
-        for(auto i : *(state->getLVL())) out << i << ", ";
+        for(auto i : *(state->getLVL())) out << (long int)i << ", ";
         out << " ]" << std::endl
             << "last_to_enter = [ ";
-        for(auto i : *(state->getLTE())) out << i << ", ";
+        for(auto i : *(state->getLTE())) out << (long unsigned)i << ", ";
         out << " ]" << std::endl;
 
         return out.str();
