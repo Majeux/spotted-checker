@@ -191,3 +191,15 @@ kripke_ptr Checker::make_explicit(const model_info& m) const {
 
     return graph;
 }
+
+void Checker::verify(spot::const_twa_ptr model, const std::string formula) const {
+    spot::parsed_formula parsed = spot::parse_infix_psl(formula);
+    spot::formula f = spot::formula::Not(parsed.f);
+    spot::twa_graph_ptr f_auto = spot::translator(model->get_dict()).run(f);
+
+    if(auto run = model->intersecting_run(f_auto))
+        std::cout << formula << " violated by: \n" << *run << std::endl << std::endl;
+    else
+        std::cout << "verified:\n" << formula << std::endl <<  std::endl;
+
+}
