@@ -38,8 +38,8 @@ class PetersonState: public spot::state {
         {}
 
         PetersonState(proc n, const std::vector<proc> &p,
-                                const std::vector<proc> &lv,
-                                const std::vector<proc> &lte) : _N(n), pc(p), level(lv), last_to_enter(lte)
+                              const std::vector<proc> &lv,
+                              const std::vector<proc> &lte) : _N(n), pc(p), level(lv), last_to_enter(lte)
         {
             assert(_N > 0);
             assert(level.size() == (size_t)_N);
@@ -47,18 +47,18 @@ class PetersonState: public spot::state {
         }
 
         PetersonState(proc n, const std::vector<proc> &p, assignment to_pc,
-                                const std::vector<proc> &lv,
-                                const std::vector<proc> &lte) : PetersonState(n, p, lv, lte)
+                              const std::vector<proc> &lv,
+                              const std::vector<proc> &lte) : PetersonState(n, p, lv, lte)
         { pc[to_pc.index] = to_pc.value; }
 
         PetersonState(proc n, const std::vector<proc> &p, assignment to_pc,
-                                const std::vector<proc> &lv,    assignment to_lv,
-                                const std::vector<proc> &lte) : PetersonState(n, p, to_pc, lv, lte)
+                              const std::vector<proc> &lv,    assignment to_lv,
+                              const std::vector<proc> &lte) : PetersonState(n, p, to_pc, lv, lte)
         { level[to_lv.index] = to_lv.value; }
 
         PetersonState(proc n, const std::vector<proc> &p, assignment to_pc,
-                                const std::vector<proc> &lv,
-                                const std::vector<proc> &lte,   assignment to_lte) : PetersonState(n, p, to_pc, lv, lte)
+                              const std::vector<proc> &lv,
+                              const std::vector<proc> &lte,   assignment to_lte) : PetersonState(n, p, to_pc, lv, lte)
         { last_to_enter[to_lte.index] = to_lte.value; }
 
         PetersonState* clone() const override {
