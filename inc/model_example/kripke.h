@@ -1,9 +1,10 @@
-#ifndef PETERSON_KRIPKE_H
-#define PETERSON_KRIPKE_H
+#ifndef EXAMPLE_KRIPKE_H
+#define EXAMPLE_KRIPKE_H
 
 #include "peterson/iterator.h"
+#include "model_template/kripke.h"
 
-class PetersonKripke: public spot::kripke {
+class MyKripke: public TemplateKripke {
     private:
         const proc _N;
         bdd* crit; //is process i < _N in critical section (for verifying mutex)
@@ -11,7 +12,7 @@ class PetersonKripke: public spot::kripke {
 
     public:
         PetersonKripke(size_t n, const spot::bdd_dict_ptr& d)
-            : spot::kripke(d), _N(n)
+            : TemplateKripke(d), _N(n)
         {
             assert(_N > 0);
             crit = new bdd[_N];
@@ -31,22 +32,6 @@ class PetersonKripke: public spot::kripke {
         PetersonState* get_init_state() const override
         {
             return new PetersonState(_N);
-        }
-
-        //recycling prevents delete/new overhead
-        PetersonIterator* succ_iter(const spot::state* s) const override {
-            const PetersonState* state = static_cast<const PetersonState*>(s);
-            bdd condition = state_condition(state);
-
-            if(iter_cache_) { //reuse old iterator if available
-                PetersonIterator* i = static_cast<PetersonIterator*>(iter_cache_);
-                iter_cache_ = nullptr;
-                i->recycle(state, condition);
-
-                return i;
-            }
-
-            return new PetersonIterator(state, condition);
         }
 
         bdd state_condition(const spot::state* s) const override
@@ -71,14 +56,21 @@ class PetersonKripke: public spot::kripke {
         {
             auto state = static_cast<const PetersonState*>(s);
             std::ostringstream out;
+            const state_variables* sv = state->getStateVars();
+
             out << "pc = [ ";
-            for(auto i : *(state->getPC())) out << (long int)i << ", ";
+            for(auto i : *(sv->arrays[pc]) )
+                out << (long int)i << ", ";
             out << " ]" << std::endl
                 << "level = [ ";
-            for(auto i : *(state->getLVL())) out << (long int)i << ", ";
+
+            for(auto i : *(sv->arrays[level]) )
+                out << (long int)i << ", ";
             out << " ] "
                 << "last_to_enter = [ ";
-            for(auto i : *(state->getLTE())) out << (long int)i << ", ";
+
+            for(auto i : *(sv->arrays[last_to_enter]) )
+                out << (long int)i << ", ";
             out << " ]" << std::endl;
 
             return out.str();

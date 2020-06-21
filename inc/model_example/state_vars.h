@@ -3,7 +3,7 @@
 
 using proc = char; //allows N up to 127, all vector values and sizes are bounded by N
 using singles_list   = std::vector<proc>;
-using arrays_list    = std::vector< std::vector<proc> >;
+using arrays_list    = std::vector< singles_list >;
 
 //small struct to hold values to be assigned
 struct assignment {

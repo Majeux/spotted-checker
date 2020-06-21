@@ -40,8 +40,7 @@ class PetersonIterator: public spot::kripke_succ_iterator {
 
         PetersonState* dst() const override;
 
-        void recycle(const PetersonState* s, bdd cond)
-        {
+        void recycle(const PetersonState* s, bdd cond) {
             pc = *(s->getPC());
             level = *(s->getLVL());
             last_to_enter = *(s->getLTE());
