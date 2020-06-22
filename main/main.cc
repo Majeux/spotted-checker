@@ -2,12 +2,14 @@
 
 #include "checker.h"
 #include "peterson/kripke.h"
+#include "model_example/kripke.h"
 
 int main() {
     Checker checker;
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     const proc N = 4;
-    auto pk = std::make_shared<PetersonKripke>(N, dict);
+    // auto pk = std::make_shared<PetersonKripke>(N, dict);
+    auto pk = std::make_shared<MyKripke>(N, dict);
 
     auto starvation = [=] () {
         std::ostringstream formula;
@@ -58,7 +60,7 @@ int main() {
 
     checker.verify(pk, starvation());
 
-    // spot::print_dot(std::cout, pk);
+    spot::print_dot(std::cout, pk);
 
     return 1;
 }

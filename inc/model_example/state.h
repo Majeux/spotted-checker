@@ -5,26 +5,10 @@
 
 class MyState : public TemplateState {
     private:
-        /* Universal/internal variables (among states) */
+        /*  Universal/internal variables (among states) */
         const proc _N;
 
-        /* This class has the following state indentifying variables and arrays */
-        enum SINGLE_VARS //Names for single values
-        {
-            //TODO: Define the names of the variables you wish to use here
-            //////////////////////////////////////////////////////
-            N_VARS //Number of single variables. NOTE: Keep N_VARS last!
-        };
-
-        enum ARRAY_VARS //Names of arrays
-        {
-            //TODO Define the names of the arrays you wish to use here
-            pc,
-            level,
-            last_to_enter,
-            ///////////////////////////////////////////
-            N_ARRAYS //Number of arrays. NOTE: Keep N_ARRAYS last!
-        };
+        /*  This class has access to the identifying variables (defined in state_vars.h) through the 'state_variables state' member in TemplateState */
 
         //Access variable 'NAME' with:               state.singles[NAME]
         //Access element 'i' in array 'NAME' with:   state.arrays[NAME][i]
@@ -39,6 +23,7 @@ class MyState : public TemplateState {
         MyState* clone() const override;
 
         proc getN() const { return _N; }
+        const singles_list* get(ARRAY_VAR name) const { return &(state.arrays[name]); }
 };
 
 

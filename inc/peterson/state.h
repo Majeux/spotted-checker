@@ -6,20 +6,7 @@
 #include <array>
 #include <cassert>
 #include <dbg.h>
-
-//value of any variable is (roughly) bounded by _N
-//limit variable size to optimize size of States
-using proc = char;
-
-struct assignment {
-    proc index;
-    proc value;
-
-    void set(const proc i, proc v) {
-        index = i;
-        value = v;
-    }
-};
+#include "model_example/state_vars.h"
 
 class PetersonState: public spot::state {
     private:

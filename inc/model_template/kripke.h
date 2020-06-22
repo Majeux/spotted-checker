@@ -1,7 +1,7 @@
 #ifndef TEMPLATE_KRIPKE_H
 #define TEMPLATE_KRIPKE_H
 
-#include "peterson/iterator.h"
+#include "model_template/iterator.h"
 
 class TemplateKripke: public spot::kripke {
     private:
@@ -11,6 +11,8 @@ class TemplateKripke: public spot::kripke {
             //register properties with bdds:
             bdd var = bdd_ithvar( register_ap("var_name") );
         }
+
+        virtual TemplateIterator* makeIterator(const spot::state* s, bdd condition) const = 0;
 
         //recycling prevents delete/new overhead
         TemplateIterator* succ_iter(const spot::state* s) const override {
@@ -25,7 +27,7 @@ class TemplateKripke: public spot::kripke {
                 return i;
             }
 
-            return new TemplateIterator(state, condition);
+            return makeIterator(state, condition);
         }
 };
 
