@@ -2,6 +2,21 @@
 
 #include "model_example/iterator.h"
 
+bool MyIterator::first() {
+    assert(_N > 0);
+    _i = _N;
+    return _i > 0;
+}
+
+bool MyIterator::next() {
+    assert(_i > 0);
+    return --_i > 0; //switch to next process
+}
+
+bool MyIterator::done() const {
+    return _i == 0;
+}
+
 TemplateState* MyIterator::dst() const {
     assert(_i <= _N);
     assert(_i > 0);

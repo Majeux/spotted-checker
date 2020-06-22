@@ -12,6 +12,13 @@ class ModelKripke: public TemplateKripke {
         bdd some_property;
         bdd other_property;
 
+        /*  Wrapper for call to the constructor of ModelIterator.
+            NOTE The ModelState should contain all information necessary to
+            load a state into the ModelIterator. The initial internal state of
+            the iterator should be set by the ModelIterator::first() function.
+        */
+        TemplateIterator* makeIterator(const spot::state* s, bdd condition) const override;
+
     public:
         ModelKripke(const spot::bdd_dict_ptr& d) : TemplateKripke(d) {
             //TODO
@@ -36,13 +43,6 @@ class ModelKripke: public TemplateKripke {
             during model checking
         */
         std::string format_state(const spot::state* s) const override;
-
-        /*  Wrapper for call to the constructor of ModelIterator.
-            NOTE The ModelState should contain all information necessary to
-            load a state into the ModelIterator. The initial internal state of
-            the iterator should be set by the ModelIterator::first() function.
-        */
-        TemplateIterator* makeIterator(const spot::state* s, bdd condition) const override;
 
 };
 

@@ -20,20 +20,11 @@ class MyIterator : public TemplateIterator {
             TemplateIterator(s, cond), _N(s->getN()) { }
 
         // Set iterator, return true iff there is at least 1 successor
-        bool first() override {
-            assert(_N > 0);
-            _i = _N;
-            return _i > 0;
-        }
+        bool first() override;
 
-        bool next() override {
-            assert(_i > 0);
-            return --_i > 0; //switch to next process
-        }
+        bool next() override;
 
-        bool done() const override {
-            return _i == 0;
-        }
+        bool done() const override;
 
         TemplateState* dst() const override;
 };
