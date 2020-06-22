@@ -6,7 +6,7 @@
 #include <array>
 #include <cassert>
 #include <dbg.h>
-#include "model_example/state_vars.h"
+#include "aux.h"
 
 class PetersonState: public spot::state {
     private:

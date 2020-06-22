@@ -2,6 +2,7 @@
 #define EXAMPLE_STATE_H
 
 #include "model_template/state.h"
+#include "model_example/state_vars.h"
 
 class MyState : public TemplateState {
     private:
