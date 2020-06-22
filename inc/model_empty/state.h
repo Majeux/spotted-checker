@@ -1,7 +1,6 @@
 #ifndef MODEL_STATE_H
 #define MODEL_STATE_H
 
-#include "aux.h"
 #include "model_template/state.h"
 #include "model_empty/state_vars.h"
 

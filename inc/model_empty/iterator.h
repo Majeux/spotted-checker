@@ -26,17 +26,15 @@ class ModelIterator : public TemplateIterator {
         /*  Access an element 'i' in array 'NAME' with: */
                 //state.arrays[NAME][i] = 0;
                 //proc x = state.arrays[NAME][i] + 1;
-                
+
         /*  Get the size pf array 'NAME' with: */
                 //state.indices[NAME]
 
     public:
-        ModelIterator::ModelIterator(const ModelState* s, bdd cond) : TemplateIterator(s, cond) {
-            //TODO
-        }
+        ModelIterator(const ModelState* s, bdd cond) : TemplateIterator(s, cond) { }
 
         /*  TODO
-            Initialize the iterator consider the first edge (if it exists)
+            Initialize the iteratorto consider the first edge (if it exists)
             Return true if there are any successors
         */
         bool first() override;
