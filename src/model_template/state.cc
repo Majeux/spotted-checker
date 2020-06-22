@@ -4,7 +4,6 @@
 #define FNV_PRIME  0x100000001b3
 
 //fnv-1a hash function, iterating over all state identifiers
-
 size_t TemplateState::hash() const {
     assert(sizeof(size_t)*8 == 64);
 
@@ -28,8 +27,9 @@ int TemplateState::compare(const spot::state* other) const {
 
     if(state.variables < o->state.variables) return -1; //first <
     if(state.variables > o->state.variables) return  1; //first > --> first ==
-    if(state.arrays  < o->state.arrays)  return -1; //first ==, second <
+    if(state.arrays    < o->state.arrays)  return -1; //first ==, second <
     //indices are part of the identity of 'arrays', no need to consider
+
     return state.arrays > o->state.arrays;        //first ==, second > or ==
 
  }

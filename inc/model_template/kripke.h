@@ -3,23 +3,20 @@
 
 #include "model_template/iterator.h"
 
-/*  Abstract Class that implements a subset of the required virtual functions of
-    spot::kripke that remain relatively constant through different implementations
-    and are technical details rather than any pertaining to a model.
+/*  This abstract class implements some of the required abstract
+    functions for spot::kripke in order to simplify model implementation.
+    This class mainly handles the creation of state iterators, optimized using
+    SPOT's iter_cache_
 */
-
 class TemplateKripke: public spot::kripke {
     private:
         //TODO: bdd variables to check properties
     public:
-        TemplateKripke(const spot::bdd_dict_ptr& d) : spot::kripke(d) {
-            //register properties with bdds:
-            bdd var = bdd_ithvar( register_ap("var_name") );
-        }
+        TemplateKripke(const spot::bdd_dict_ptr& d) : spot::kripke(d) { }
 
         /*  TemplateIterator cannot be constructed since it is virtual
-            This wrapper must be implemented in a child class to construct a new
-            iterator
+            This wrapper around a constructor must be implemented in a child
+            class to construct a new iterator
         */
         virtual TemplateIterator* makeIterator(const spot::state* s, bdd condition) const = 0;
 

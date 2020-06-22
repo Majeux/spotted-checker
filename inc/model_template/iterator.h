@@ -3,6 +3,11 @@
 
 #include "model_template/state.h"
 
+/*  This abstract class implements some of the required abstract
+    functions for spot::kripke_succ_iterator in order to simplify model
+    implementation. This classes functionality connects to the
+    TemplateKripke::succ_iter function to repurpose existing iterators.
+*/
 class TemplateIterator: public spot::kripke_succ_iterator {
     protected:
         state_variables state;
@@ -11,7 +16,9 @@ class TemplateIterator: public spot::kripke_succ_iterator {
         TemplateIterator(const TemplateState* s, bdd cond) :
             kripke_succ_iterator(cond), state(s->getStateVars()) { }
 
-        //to avoid reallocating iterators
+        /*  Repurpose an existing iterator for another state
+            Avoids additional new/delete
+        */
         void recycle(const TemplateState* s, bdd cond) {
             //other variables are invariant among iterators
             //or are auxiliary
