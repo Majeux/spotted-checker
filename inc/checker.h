@@ -13,16 +13,21 @@
 #include <vector>
 #include <algorithm>
 
-using kripke_ptr = spot::kripke_graph_ptr;
-using state      = uint32_t;
+using explicit_Kripke            = spot::kripke_graph_ptr;
+using Automata                   = spot::twa_ptr;
+using const_Automata             = spot::const_twa_ptr;
+using explicit_Automata          = spot::twa_graph_ptr;
+using const_explicit_Automata    = spot::const_twa_graph_ptr;
+using State                      = uint32_t;
+using Edge                       = std::tuple<State, State, bdd>;
 
 struct model_info {
-    state States;
-    state Initial;
+    State States;
+    State Initial;
 
     std::vector<std::string>          Symbols;
     std::vector< std::vector<bool> >  Labels;
-    std::vector< std::vector<state> > Transitions;
+    std::vector< std::vector<State> > Transitions;
 
     friend std::ostream& operator << (std::ostream& os, const model_info& m);
 };
@@ -32,13 +37,14 @@ class Checker {
     public:
         Checker();
 
-    // Hardcoded test
-    kripke_ptr  explicit_door_kripke() const;
     // Reading user input
-    bool        read_kripke(std::string filename, model_info& model) const;
-    kripke_ptr  make_explicit(const model_info& m) const;
-    void verify(spot::const_twa_ptr model, const std::string formula) const;
+    bool read_kripke(std::string filename, model_info& model) const;
+    explicit_Kripke  make_explicit(const model_info& m) const;
+    explicit_Kripke  explicit_door_kripke() const;
 
+    void verify(const_Automata model, const std::string formula) const;
+
+    explicit_Automata defineBuchi(const_Automata model) const;
 
     /* TODO Create property checks
         * Standard method for deadlocks/liveness and stuff
@@ -54,6 +60,8 @@ class Checker {
 
     private:
         spot::bdd_dict_ptr dict; //TODO possibly global dict to ensure consistency with variable naming
+        explicit_Automata initBuchi(const_Automata model, unsigned n, State init) const;
+        explicit_Automata buildBuchi(explicit_Automata aut, const std::vector<State> &init, const std::vector<Edge> edges) const;
 };
 
 #endif

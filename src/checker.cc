@@ -1,6 +1,8 @@
 #include <iostream>
 
 #include <spot/twa/bdddict.hh>
+#include <spot/twaalgos/dot.hh>
+#include <spot/twaalgos/hoa.hh>
 
 #include "checker.h"
 
@@ -13,7 +15,7 @@ std::ostream& operator<< (std::ostream& os, const model_info& m) {
     for(auto s : m.Symbols)
         os << s << ' ';
 
-    state i = 0;
+    State i = 0;
     os << std::endl << "Labels: \t" << i++ << ": ";
     for(auto v : m.Labels) {
         for(auto l : v)
@@ -39,9 +41,9 @@ Checker::Checker() {
 }
 
 // CREATE MODEL
-spot::kripke_graph_ptr Checker::explicit_door_kripke() const {
+explicit_Kripke Checker::explicit_door_kripke() const {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
-    spot::kripke_graph_ptr k = spot::make_kripke_graph(dict);
+    explicit_Kripke k = spot::make_kripke_graph(dict);
 
     bdd open    = bdd_ithvar(k->register_ap("open"));
     bdd pushed  = bdd_ithvar(k->register_ap("pushed"));
@@ -102,7 +104,7 @@ bool Checker::read_kripke(std::string filename, model_info& model) const {
             }
 
             //Read Labels
-            for(state i = 0; i < model.States; i++) {
+            for(State i = 0; i < model.States; i++) {
                 if(!std::getline (file, line)) {
                     std::cerr << "-- ERROR: Missing line for Labels: " << filename << std::endl;
                     return false;
@@ -122,14 +124,14 @@ bool Checker::read_kripke(std::string filename, model_info& model) const {
                 model.Labels.push_back(v); v.clear();
             }
             //Read Transitions
-            for(state i = 0; i < model.States; i++) {
+            for(State i = 0; i < model.States; i++) {
                 if(!std::getline (file, line)) {
                     std::cerr << "-- ERROR: Missing line for Transitions: " << filename << std::endl;
                     return false;
                 }
                 ss.clear();
                 ss.str(line);
-                std::vector<state> v; state s;
+                std::vector<State> v; State s;
 
                 while(ss >> s)
                     v.push_back(s);
@@ -151,11 +153,11 @@ bool Checker::read_kripke(std::string filename, model_info& model) const {
 }
 
 // Create a Kripke graph from a specified model using the 'Explicit' method
-kripke_ptr Checker::make_explicit(const model_info& m) const {
+explicit_Kripke Checker::make_explicit(const model_info& m) const {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     spot::kripke_graph_ptr graph = spot::make_kripke_graph(dict);
 
-    state* states = new state[m.States];
+    State* states = new State[m.States];
     bdd* symbols = new bdd[m.Symbols.size()];
 
     // Initialize symbols
@@ -163,7 +165,7 @@ kripke_ptr Checker::make_explicit(const model_info& m) const {
         symbols[i] = bdd_ithvar(graph->register_ap(m.Symbols[i]));
 
     // Assign labels to states
-    for(state s = 0; s < m.Labels.size(); s++) {
+    for(State s = 0; s < m.Labels.size(); s++) {
         auto temp = m.Labels[s][0] ? symbols[0] : !(symbols[0]);
 
         for(uint32_t i = 1; i < m.Labels[0].size(); i++)
@@ -175,8 +177,8 @@ kripke_ptr Checker::make_explicit(const model_info& m) const {
     // Set states
     graph->set_init_state(states[m.Initial]);
 
-    for(state from = 0; from < m.Transitions.size(); from++) {
-        for(state to : m.Transitions[from])
+    for(State from = 0; from < m.Transitions.size(); from++) {
+        for(State to : m.Transitions[from])
             graph->new_edge(from, to);
     }
 
@@ -192,14 +194,48 @@ kripke_ptr Checker::make_explicit(const model_info& m) const {
     return graph;
 }
 
-void Checker::verify(spot::const_twa_ptr model, const std::string formula) const {
+void Checker::verify(const_Automata model, const std::string formula) const {
     spot::parsed_formula parsed = spot::parse_infix_psl(formula);
     spot::formula f = spot::formula::Not(parsed.f);
-    spot::twa_graph_ptr f_auto = spot::translator(model->get_dict()).run(f);
+    explicit_Automata f_auto = spot::translator(model->get_dict()).run(f);
+
+    spot::print_hoa(std::cout, f_auto);
 
     if(auto run = model->intersecting_run(f_auto))
         std::cout << formula << " violated by: \n" << *run << std::endl << std::endl;
     else
         std::cout << "verified:\n" << formula << std::endl <<  std::endl;
 
+}
+
+
+explicit_Automata Checker::initBuchi(const_Automata model, unsigned n, State init) const {
+    //Initialize automaton
+    explicit_Automata aut = spot::make_twa_graph(model->get_dict());
+    aut->prop_state_acc(true); //Sets state based acceptance
+    aut->set_buchi(); //Sets accepting condition for Buchi
+    aut->new_states(n);
+    aut->set_init_state(init);
+
+    return aut;
+}
+
+explicit_Automata Checker::buildBuchi(explicit_Automata aut, const std::vector<State> &init, const std::vector<Edge> edges) const {
+    bool acc_index[edges.size()];
+}
+
+explicit_Automata Checker::defineBuchi(const_Automata model) const {
+    unsigned n_states       = 2; //numbered from 0 ... n-1
+    State initial_state     = 0;
+    std::vector<State> accepting_states = {1};
+    explicit_Automata automata = initBuchi(model, n_states, initial_state);
+
+    //NOTE properties should correspond to the ones in the model
+    bdd property1 = bdd_ithvar(automata->register_ap("property1"));
+    bdd property2 = bdd_ithvar(automata->register_ap("property2"));
+
+    std::vector<Edge> edges;
+    edges.push_back({0, 1, property1 & !property2});
+
+    return buildBuchi(automata, accepting_states, edges);
 }
