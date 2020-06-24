@@ -3,6 +3,7 @@
 
 #include <spot/kripke/kripkegraph.hh>
 #include <spot/twaalgos/dot.hh>
+#include <spot/twaalgos/hoa.hh>
 #include <spot/tl/parse.hh>
 #include <spot/twaalgos/translate.hh>
 #include <spot/twaalgos/emptiness.hh>
@@ -19,7 +20,7 @@ using const_Automata             = spot::const_twa_ptr;
 using explicit_Automata          = spot::twa_graph_ptr;
 using const_explicit_Automata    = spot::const_twa_graph_ptr;
 using State                      = uint32_t;
-using Edge                       = std::tuple<State, State, bdd>;
+struct Edge { State from; State to; bdd cond; };
 
 struct model_info {
     State States;
@@ -46,6 +47,8 @@ class Checker {
 
     explicit_Automata defineBuchi(const_Automata model) const;
 
+    explicit_Automata defineMutex3(const_Automata model) const;
+
     /* TODO Create property checks
         * Standard method for deadlocks/liveness and stuff
         * Parse LTL formula to evaluate model dependent property
@@ -60,8 +63,13 @@ class Checker {
 
     private:
         spot::bdd_dict_ptr dict; //TODO possibly global dict to ensure consistency with variable naming
-        explicit_Automata initBuchi(const_Automata model, unsigned n, State init) const;
-        explicit_Automata buildBuchi(explicit_Automata aut, const std::vector<State> &init, const std::vector<Edge> edges) const;
+        explicit_Automata initBuchi(    const_Automata model,
+                                        unsigned n,
+                                        State init) const;
+
+        explicit_Automata buildBuchi(   explicit_Automata aut,
+                                        const std::vector<State> &init,
+                                        const std::vector<Edge> edges) const;
 };
 
 #endif

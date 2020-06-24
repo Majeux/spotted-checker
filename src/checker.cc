@@ -1,8 +1,6 @@
 #include <iostream>
 
 #include <spot/twa/bdddict.hh>
-#include <spot/twaalgos/dot.hh>
-#include <spot/twaalgos/hoa.hh>
 
 #include "checker.h"
 
@@ -197,10 +195,9 @@ explicit_Kripke Checker::make_explicit(const model_info& m) const {
 void Checker::verify(const_Automata model, const std::string formula) const {
     spot::parsed_formula parsed = spot::parse_infix_psl(formula);
     spot::formula f = spot::formula::Not(parsed.f);
-    explicit_Automata f_auto = spot::translator(model->get_dict()).run(f);
+    explicit_Automata f_auto = spot::translator(model->get_dict()).run(parsed.f);
 
-    spot::print_hoa(std::cout, f_auto);
-
+    spot::print_dot(std::cout, f_auto);
     if(auto run = model->intersecting_run(f_auto))
         std::cout << formula << " violated by: \n" << *run << std::endl << std::endl;
     else
@@ -221,21 +218,94 @@ explicit_Automata Checker::initBuchi(const_Automata model, unsigned n, State ini
 }
 
 explicit_Automata Checker::buildBuchi(explicit_Automata aut, const std::vector<State> &init, const std::vector<Edge> edges) const {
-    bool acc_index[edges.size()];
+    bool* acc_index = new bool[edges.size()];
+    bool first = true;
+    size_t i;
+
+    //A state is considered accepting if all outgoing transitions are in {0}
+    for(State s : init) {
+        i = 0;
+        for(Edge e : edges) {
+            if(e.from == s)
+                acc_index[i] = true;
+            else if(first)
+                acc_index[i] = false;
+
+            i++;
+        }
+        first = false;
+    }
+
+    i = 0;
+    for(Edge e : edges) {
+        if(acc_index[i++])
+            aut->new_edge(e.from, e.to, e.cond, {0});
+        else
+            aut->new_edge(e.from, e.to, e.cond);
+    }
+
+    delete[] acc_index;
+
+    return aut;
 }
 
+//TODO Define an explicit Buchi automata representing some property we wish to check
 explicit_Automata Checker::defineBuchi(const_Automata model) const {
+    //TODO define states used
     unsigned n_states       = 2; //numbered from 0 ... n-1
+
+    //TODO define an initial state
     State initial_state     = 0;
-    std::vector<State> accepting_states = {1};
+
+    //TODO define accepting states
+    //NOTE an accepting state must have outgoing transitions
+    std::vector<State> accepting_states = { 0 };
+
+    //intitializes our automata in spot
     explicit_Automata automata = initBuchi(model, n_states, initial_state);
 
-    //NOTE properties should correspond to the ones in the model
+    bdd True = !bdd();
+    bdd False = bdd();
+    //TODO define some propery variables used in the transitions
+    //NOTE property names should correspond to the ones in the model
     bdd property1 = bdd_ithvar(automata->register_ap("property1"));
     bdd property2 = bdd_ithvar(automata->register_ap("property2"));
 
-    std::vector<Edge> edges;
-    edges.push_back({0, 1, property1 & !property2});
+    //TODO define the edges in our automaton
+    //NOTE construct an edge with {from State, to State, bdd property}
+    std::vector<Edge> edges =
+    {
+        { 0, 1,  property1 & !property2 },
+        { 0, 0, !property1 },
+        { 1, 1, True }
+        /* ... */
+    };
+
+    return buildBuchi(automata, accepting_states, edges);
+}
+
+//complement of 3 v/ariable mutex:
+//eventually there are two processes in their critical section
+explicit_Automata Checker::defineMutex3(const_Automata model) const {
+    unsigned n_states       = 2;
+    State initial_state     = 0;
+    std::vector<State> accepting_states = { 1 };
+
+    explicit_Automata automata = initBuchi(model, n_states, initial_state);
+
+    bdd True = !bdd();
+    bdd False = bdd();
+
+    bdd c0 = bdd_ithvar(automata->register_ap("crit0") );
+    bdd c1 = bdd_ithvar(automata->register_ap("crit1") );
+    bdd c2 = bdd_ithvar(automata->register_ap("crit2") );
+
+    std::vector<Edge> edges =
+    {
+        { 0, 0, !((c0 & c1) | (c0 & c2) | (c1 & c2)) },
+        { 0, 1, (c0 & c1) | (c0 & c2) | (c1 & c2) },
+        { 1, 1, True }
+    };
 
     return buildBuchi(automata, accepting_states, edges);
 }
