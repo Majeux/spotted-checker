@@ -1,4 +1,5 @@
 #include <iostream>
+#include <functional>
 
 #include "checker.h"
 #include "peterson/kripke.h" //PetersonKripke
@@ -7,38 +8,59 @@
 int main() {
     Checker checker;
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
-    const proc N = 4;
+    const proc N = 3;
     // auto pk = std::make_shared<PetersonKripke>(N, dict);
     auto pk = std::make_shared<MyKripke>(N, dict);
 
-    auto starvation = [=] () {
+    auto starvation = [=] (std::function<std::string(proc)> crit, std::function<std::string(proc)> wait) {
         std::ostringstream formula;
 
         for(proc i = 0; i < N; i++) { //starvation free: any process tthat starts waiting, gets access
             if(i > 0)
                 formula << " && ";
 
-            formula << pk->waiting_string(i) << " -> F("
-                    << pk->critical_string(i) << " && !" << pk->waiting_string(i) << ")";
+            formula << wait(i) << " -> F("
+                    << crit(i) << " && !" << wait(i) << ")";
         }
         return formula.str();
     };
 
-    auto mutex = [=] () {
-        std::ostringstream formula;
-        std::ostringstream formula2;
+    // auto mutex = [=] () {
+    //     std::ostringstream formula;
+    //     std::ostringstream formula2;
+    //
+    //     formula << "G( (";
+    //     for(size_t i = 0; i < N; i++) { //starvation free: any process tthat starts waiting, gets access
+    //         if(i > 0) {
+    //             formula  << " && ";
+    //             formula2 << " ^ ";
+    //         }
+    //
+    //         formula  << '!' << pk->critical_string(i);
+    //         formula2 << pk->critical_string(i);
+    //     }
+    //     formula << ") || (" << formula2.str() << ") )";
+    //     return formula.str();
+    // };
 
-        formula << "G( (";
-        for(size_t i = 0; i < N; i++) { //starvation free: any process tthat starts waiting, gets access
-            if(i > 0) {
-                formula  << " && ";
-                formula2 << " xor ";
+    auto mutex = [=] (std::function<std::string(proc)> crit) {
+        std::ostringstream formula;
+
+        formula << "G( ";
+        for(size_t i = 0; i < N; i++) {
+            //turn off i
+            formula << "(";
+            for(size_t j = 0; j < N; j++) {
+                if(j != i) {
+                    formula << "!" << crit(j);
+                    if(j < N-1 && !(j+1 == i && i == N-1) ) formula << " && ";
+                    else formula << ")";
+                }
             }
 
-            formula  << '!' << pk->critical_string(i);
-            formula2 << pk->critical_string(i);
+            if(i < N-1) formula << " || ";
+            else formula << ")";
         }
-        formula << ") || (" << formula2.str() << ") )";
         return formula.str();
     };
 
@@ -56,11 +78,11 @@ int main() {
     // std::cerr << std::endl << "-- done" << std::endl;
 
     // std::string formula = "G( (!crit0 && !crit1) || crit0 xor crit1)"; //mutex
-    checker.verify(pk, mutex());
+    checker.verify( pk, mutex(std::bind(pk->critical_string, std::placeholders::_1)) );
 
-    checker.verify(pk, starvation());
+    // checker.verify(pk, starvation());
 
-    // spot::print_dot(std::cout, pk);
-
+    spot::print_dot(std::cout, checker.defineMutex3(pk));
+    spot::print_hoa(std::cout, checker.defineMutex3(pk));
     return 1;
 }
