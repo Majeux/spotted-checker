@@ -23,9 +23,9 @@ class MyKripke: public TemplateKripke {
 
         std::string format_state(const spot::state* s) const override;
 
-        std::string critical_string(proc i) const;
+        static std::string critical_string(proc i);
 
-        std::string waiting_string(proc i) const;
+        static std::string waiting_string(proc i);
 };
 
 #endif

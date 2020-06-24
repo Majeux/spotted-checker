@@ -74,13 +74,13 @@ std::string MyKripke::format_state(const spot::state* s) const {
 }
 
 /*  Auxiliary functions that define a format for our property names */
-std::string MyKripke::critical_string(proc i) const {
+std::string MyKripke::critical_string(proc i) {
     std::string critical = "crit";
     critical += '0' + i;
     return critical;
 }
 
-std::string MyKripke::waiting_string(proc i) const {
+std::string MyKripke::waiting_string(proc i) {
     std::string waiting = "wait";
     waiting += '0' + i;
     return waiting;

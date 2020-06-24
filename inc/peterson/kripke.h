@@ -84,13 +84,13 @@ class PetersonKripke: public spot::kripke {
             return out.str();
         }
 
-        std::string critical_string(proc i) const {
+        static std::string critical_string(proc i) {
             std::string critical = "crit";
             critical += '0' + i;
             return critical;
         }
 
-        std::string waiting_string(proc i) const {
+        static std::string waiting_string(proc i) {
             std::string waiting = "wait";
             waiting += '0' + i;
             return waiting;
