@@ -39,7 +39,7 @@ Checker::Checker() {
 }
 
 // CREATE MODEL
-explicit_Kripke Checker::explicit_door_kripke() const {
+explicit_Kripke Checker::explicit_door_kripke() {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     explicit_Kripke k = spot::make_kripke_graph(dict);
 
@@ -71,7 +71,7 @@ explicit_Kripke Checker::explicit_door_kripke() const {
 
 //TODO check if presizing possible in vectors (based on N_STATES)
 // Read specification of a model from a file
-bool Checker::read_kripke(std::string filename, model_info& model) const {
+bool Checker::read_kripke(std::string filename, model_info& model) {
     std::ifstream file (filename);
 
     if (file.is_open()) {
@@ -151,7 +151,7 @@ bool Checker::read_kripke(std::string filename, model_info& model) const {
 }
 
 // Create a Kripke graph from a specified model using the 'Explicit' method
-explicit_Kripke Checker::make_explicit(const model_info& m) const {
+explicit_Kripke Checker::make_explicit(const model_info& m) {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     spot::kripke_graph_ptr graph = spot::make_kripke_graph(dict);
 
@@ -192,10 +192,10 @@ explicit_Kripke Checker::make_explicit(const model_info& m) const {
     return graph;
 }
 
-void Checker::verify(const_Automata model, const std::string formula) const {
+void Checker::verify(const_Automaton model, const std::string formula) {
     spot::parsed_formula parsed = spot::parse_infix_psl(formula);
     spot::formula f = spot::formula::Not(parsed.f);
-    explicit_Automata f_auto = spot::translator(model->get_dict()).run(parsed.f);
+    explicit_Automaton f_auto = spot::translator(model->get_dict()).run(parsed.f);
 
     spot::print_dot(std::cout, f_auto);
     if(auto run = model->intersecting_run(f_auto))
@@ -206,9 +206,9 @@ void Checker::verify(const_Automata model, const std::string formula) const {
 }
 
 
-explicit_Automata Checker::initBuchi(const_Automata model, unsigned n, State init) const {
+explicit_Automaton Checker::initBuchi(const_Automaton model, unsigned n, State init) {
     //Initialize automaton
-    explicit_Automata aut = spot::make_twa_graph(model->get_dict());
+    explicit_Automaton aut = spot::make_twa_graph(model->get_dict());
     aut->prop_state_acc(true); //Sets state based acceptance
     aut->set_buchi(); //Sets accepting condition for Buchi
     aut->new_states(n);
@@ -217,7 +217,7 @@ explicit_Automata Checker::initBuchi(const_Automata model, unsigned n, State ini
     return aut;
 }
 
-explicit_Automata Checker::buildBuchi(explicit_Automata aut, const std::vector<State> &init, const std::vector<Edge> edges) const {
+explicit_Automaton Checker::buildBuchi(explicit_Automaton aut, const std::vector<State> &init, const std::vector<Edge> edges) {
     bool* acc_index = new bool[edges.size()];
     bool first = true;
     size_t i;
@@ -250,7 +250,7 @@ explicit_Automata Checker::buildBuchi(explicit_Automata aut, const std::vector<S
 }
 
 //TODO Define an explicit Buchi automata representing some property we wish to check
-explicit_Automata Checker::defineBuchi(const_Automata model) const {
+explicit_Automaton Checker::defineBuchi(const_Automaton model) {
     //TODO define states used
     unsigned n_states       = 2; //numbered from 0 ... n-1
 
@@ -262,7 +262,7 @@ explicit_Automata Checker::defineBuchi(const_Automata model) const {
     std::vector<State> accepting_states = { 0 };
 
     //intitializes our automata in spot
-    explicit_Automata automata = initBuchi(model, n_states, initial_state);
+    explicit_Automaton automata = initBuchi(model, n_states, initial_state);
 
     bdd True = !bdd();
     bdd False = bdd();
@@ -286,12 +286,12 @@ explicit_Automata Checker::defineBuchi(const_Automata model) const {
 
 //complement of 3 v/ariable mutex:
 //eventually there are two processes in their critical section
-explicit_Automata Checker::defineMutex3(const_Automata model) const {
+explicit_Automaton Checker::defineMutex3(const_Automaton model) {
     unsigned n_states       = 2;
     State initial_state     = 0;
     std::vector<State> accepting_states = { 1 };
 
-    explicit_Automata automata = initBuchi(model, n_states, initial_state);
+    explicit_Automaton automata = initBuchi(model, n_states, initial_state);
 
     bdd True = !bdd();
     bdd False = bdd();

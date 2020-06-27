@@ -2,6 +2,7 @@
 #include <functional>
 
 #include "checker.h"
+#include "cross_product.h"
 #include "peterson/kripke.h" //PetersonKripke
 #include "model_example/kripke.h" //MyKripke
 
@@ -78,11 +79,11 @@ int main() {
     // std::cerr << std::endl << "-- done" << std::endl;
 
     // std::string formula = "G( (!crit0 && !crit1) || crit0 xor crit1)"; //mutex
-    checker.verify( pk, mutex(std::bind(pk->critical_string, std::placeholders::_1)) );
+    // checker.verify( pk, mutex(std::bind(pk->critical_string, std::placeholders::_1)) );
 
     // checker.verify(pk, starvation());
 
     spot::print_dot(std::cout, checker.defineMutex3(pk));
-    spot::print_hoa(std::cout, checker.defineMutex3(pk));
+    // spot::print_hoa(std::cout, checker.defineMutex3(pk));
     return 1;
 }
