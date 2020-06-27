@@ -227,7 +227,6 @@ void Checker::verify(const_Automaton model, const std::string formula) {
 
 }
 
-
 explicit_Automaton Checker::initBuchi(const_Automaton model, unsigned n, State init) {
     //Initialize automaton
     explicit_Automaton aut = spot::make_twa_graph(model->get_dict());
@@ -333,7 +332,7 @@ explicit_Automaton Checker::defineMutex3(const_Automaton model) {
 }
 
 explicit_Automaton Checker::defineTrafficBuchi(const_Automaton model) {
-    unsigned n_states       = 2;
+    unsigned n_states       = 3;
     State initial_state     = 0;
     std::vector<State> accepting_states = { 1 };
 

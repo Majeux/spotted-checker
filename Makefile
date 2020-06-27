@@ -8,7 +8,7 @@ MAIN_OBJ		= $(MAIN_SRC:.cc=.o)
 MAIN_TARGET		= spot-check
 
 CC				= g++
-CFLAGS			= -std=c++14 -Wall -Wextra
+CFLAGS			= -std=c++14 -Wall -Wextra -g
 CPPFLAGS 		= $(addprefix -I, $(INC_DIR)) -pedantic
 SPOTFLAGS 		= -lspot -lbddx
 

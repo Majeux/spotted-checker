@@ -21,6 +21,7 @@ class CrossProduct {
         std::stack< iter_pair >  S_it;
         // std::set< CrossState > visited;
 
+        void print_trans(state_pair from, state_pair to);
         void computeInitial();
         void increment();
         void visit(const spot::state* a, const spot::state* b);
