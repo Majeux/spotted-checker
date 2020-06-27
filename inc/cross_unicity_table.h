@@ -5,7 +5,7 @@
 
 #include <set>
 
-using state_pair = std::pair< const spot::state*, const spot::state* >;
+#include "aliases.h"
 
 /*  Hash functor for hashing a pair of state pointers.
 Based on the boost hash_combine function, adapted for two hashes. */
@@ -75,6 +75,8 @@ class cross_unicity_table {
         }
 
         size_t size() const { return set.size(); }
+
+        void clear() { set.clear(); }
 };
 
 #endif

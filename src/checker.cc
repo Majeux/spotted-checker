@@ -69,6 +69,28 @@ explicit_Kripke Checker::explicit_door_kripke() {
     return k;
 }
 
+const_Kripke Checker::explicit_traffic() {
+    spot::bdd_dict_ptr dict = spot::make_bdd_dict();
+    explicit_Kripke k = spot::make_kripke_graph(dict);
+
+    bdd red    = bdd_ithvar(k->register_ap("red"));
+    bdd green  = bdd_ithvar(k->register_ap("green"));
+
+    unsigned x0 = k->new_state(red);
+    unsigned x1 = k->new_state(green);
+
+    k->set_init_state(x0);
+
+    k->new_edge(x0, x1);
+
+    k->new_edge(x1, x0);
+
+    auto names = new std::vector<std::string> { "s0", "s1" };
+    k->set_named_prop("state-names", names);
+
+    return k;
+}
+
 //TODO check if presizing possible in vectors (based on N_STATES)
 // Read specification of a model from a file
 bool Checker::read_kripke(std::string filename, model_info& model) {
@@ -305,6 +327,31 @@ explicit_Automaton Checker::defineMutex3(const_Automaton model) {
         { 0, 0, !((c0 & c1) | (c0 & c2) | (c1 & c2)) },
         { 0, 1, (c0 & c1) | (c0 & c2) | (c1 & c2) },
         { 1, 1, True }
+    };
+
+    return buildBuchi(automata, accepting_states, edges);
+}
+
+explicit_Automaton Checker::defineTrafficBuchi(const_Automaton model) {
+    unsigned n_states       = 2;
+    State initial_state     = 0;
+    std::vector<State> accepting_states = { 1 };
+
+    explicit_Automaton automata = initBuchi(model, n_states, initial_state);
+
+    bdd True = !bdd();
+    bdd False = bdd();
+
+    bdd red = bdd_ithvar(automata->register_ap("red") );
+    bdd green = bdd_ithvar(automata->register_ap("green") );
+
+    std::vector<Edge> edges =
+    {
+        { 0, 0, True },
+        { 0, 1, !green },
+        { 1, 1, !green },
+        { 1, 2, green },
+        { 2, 2, True}
     };
 
     return buildBuchi(automata, accepting_states, edges);

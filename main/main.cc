@@ -11,7 +11,7 @@ int main() {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     const proc N = 3;
     // auto pk = std::make_shared<PetersonKripke>(N, dict);
-    auto pk = std::make_shared<MyKripke>(N, dict);
+    // auto pk = std::make_shared<MyKripke>(N, dict);
 
     auto starvation = [=] (std::function<std::string(proc)> crit, std::function<std::string(proc)> wait) {
         std::ostringstream formula;
@@ -25,24 +25,6 @@ int main() {
         }
         return formula.str();
     };
-
-    // auto mutex = [=] () {
-    //     std::ostringstream formula;
-    //     std::ostringstream formula2;
-    //
-    //     formula << "G( (";
-    //     for(size_t i = 0; i < N; i++) { //starvation free: any process tthat starts waiting, gets access
-    //         if(i > 0) {
-    //             formula  << " && ";
-    //             formula2 << " ^ ";
-    //         }
-    //
-    //         formula  << '!' << pk->critical_string(i);
-    //         formula2 << pk->critical_string(i);
-    //     }
-    //     formula << ") || (" << formula2.str() << ") )";
-    //     return formula.str();
-    // };
 
     auto mutex = [=] (std::function<std::string(proc)> crit) {
         std::ostringstream formula;
@@ -83,7 +65,18 @@ int main() {
 
     // checker.verify(pk, starvation());
 
-    spot::print_dot(std::cout, checker.defineMutex3(pk));
+    // spot::print_dot(std::cout, checker.defineMutex3(pk));
     // spot::print_hoa(std::cout, checker.defineMutex3(pk));
+
+    auto traffic = Checker::explicit_traffic();
+    auto traffic_buchi = Checker::defineTrafficBuchi(traffic);
+
+    spot::print_dot(std::cout, traffic);
+    spot::print_dot(std::cout, traffic_buchi);
+
+    CrossProduct cross(traffic, traffic_buchi);
+
+    cross();
+
     return 1;
 }
