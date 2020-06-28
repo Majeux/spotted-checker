@@ -76,7 +76,9 @@ int main() {
 
     CrossProduct cross(traffic, traffic_buchi);
 
-    cross();
+    std::stack< state_pair > s = cross();
+
+    std::cerr << s.size() << std::endl;
 
     return 1;
 }
