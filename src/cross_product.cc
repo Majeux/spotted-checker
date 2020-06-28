@@ -1,6 +1,6 @@
 #include "cross_product.h"
 
-CrossProduct::CrossProduct(const_Kripke A, const_explicit_Automaton B) : A_(A), B_(B) { computeInitial(); }
+CrossProduct::CrossProduct(const_Kripke A, const_explicit_Automaton B) : A_(A), B_(B) { }
 
 void CrossProduct::computeInitial() {
     const spot::state* A_0 = A_->get_init_state();
@@ -35,7 +35,7 @@ void CrossProduct::print_trans(state_pair from, state_pair to) {
 
 bool CrossProduct::cycle(const spot::state* s_acc, const spot::state* q_acc) {
     visit(s_acc, q_acc, true);
-
+    std::cerr << "cycle search" << std::endl;
     while(!C.empty()) {
         spot::twa_succ_iterator* A_it = C_it.top().first;
         const spot::state* s = C.top().first;
@@ -71,6 +71,8 @@ std::stack<state_pair> CrossProduct::operator()() {
     seen.clear();
     seen_cycle.clear();
 
+    computeInitial();
+
     while(!S.empty()) {
         assert(S.size() == S_it.size());
         /*  Read top of the stack */
@@ -89,20 +91,20 @@ std::stack<state_pair> CrossProduct::operator()() {
 
         //NOTE  all states and iterators must be fetched from their stacks
         //      before incrementing.
-        if(increment()) //completed a dfs
-            if(B_->state_is_accepting(q)) {
-                if(cycle(s, q))
-                    return S;
-            }
+        bool end_dfs = increment();
 
         //NOTE  check if Label(t) matches Label(q->p)
         //      fetch necessary information before incrementing!
         if( (L_t & q_p) != bddfalse ) { //labels do not contradict
+            visit(t, p);
             /*  TODO <s,q> --> <t,p> is in the product
                 Do some work */
-
             print_trans({s,q}, {t,p});
-            visit(t, p);
+
+            if( end_dfs && B_->state_is_accepting(q) ) {
+                if(cycle(s, q))
+                    return S;
+            }
         }
     }
     return S;
@@ -157,4 +159,34 @@ void CrossProduct::visit(const spot::state* a, const spot::state* b, bool cycle)
             B_->release_iter(B_it);
         }
     }
+}
+
+void CrossProduct::trace() {
+    std::stack< state_pair > s = S;
+    std::stack< state_pair > c = C;
+    std::stack< state_pair > s_print;
+    std::stack< state_pair > c_print;
+
+    while(!s.empty() && !C.empty()) {
+        if(!s.empty()) {
+            s_print.push(s.top());
+            s.pop();
+        }
+        if(!c.empty()) {
+            c_print.push(c.top());
+            c.pop();
+        }
+    }
+
+    std::cerr << "Path:\n";
+    while(!s_print.empty()) {
+        std::cerr << A_->format_state(s_print.top().first) << std::endl;
+        s_print.pop();
+    }
+
+    while(!c_print.empty()) {
+        std::cerr << A_->format_state(c_print.top().first) << std::endl;
+        c_print.pop();
+    }
+
 }

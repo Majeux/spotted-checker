@@ -91,6 +91,33 @@ const_Kripke Checker::explicit_traffic() {
     return k;
 }
 
+const_Kripke Checker::explicit_traffic2() {
+    spot::bdd_dict_ptr dict = spot::make_bdd_dict();
+    explicit_Kripke k = spot::make_kripke_graph(dict);
+
+    bdd False  = bdd();
+    bdd red    = bdd_ithvar(k->register_ap("red"));
+    bdd green  = bdd_ithvar(k->register_ap("green"));
+
+    unsigned x0 = k->new_state(red);
+    unsigned x1 = k->new_state(green);
+    unsigned x2 = k->new_state((!red) & (!green));
+
+    k->set_init_state(x0);
+
+    k->new_edge(x0, x1);
+
+    k->new_edge(x1, x0);
+
+    k->new_edge(x0, x2);
+    k->new_edge(x2, x0);
+
+    auto names = new std::vector<std::string> { "s0", "s1", "s2" };
+    k->set_named_prop("state-names", names);
+
+    return k;
+}
+
 //TODO check if presizing possible in vectors (based on N_STATES)
 // Read specification of a model from a file
 bool Checker::read_kripke(std::string filename, model_info& model) {

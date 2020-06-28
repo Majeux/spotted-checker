@@ -43,6 +43,7 @@ class Checker {
         static explicit_Kripke make_explicit(const model_info& m);
         static explicit_Kripke explicit_door_kripke();
         static const_Kripke explicit_traffic();
+        static const_Kripke explicit_traffic2();
 
         //Making explicit property buchi automata
         /* TODO Abstracts creation of buchi automaton with spot */

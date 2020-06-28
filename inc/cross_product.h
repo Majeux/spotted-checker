@@ -36,6 +36,7 @@ class CrossProduct {
         CrossProduct(const_Kripke A, const_explicit_Automaton B);
 
         std::stack<state_pair> operator()();
+        void trace();
 
 };
 

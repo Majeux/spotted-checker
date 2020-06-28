@@ -1,6 +1,7 @@
 #include <iostream>
 #include <functional>
 
+#include "dbg.h"
 #include "checker.h"
 #include "cross_product.h"
 #include "peterson/kripke.h" //PetersonKripke
@@ -68,7 +69,7 @@ int main() {
     // spot::print_dot(std::cout, checker.defineMutex3(pk));
     // spot::print_hoa(std::cout, checker.defineMutex3(pk));
 
-    auto traffic = Checker::explicit_traffic();
+    auto traffic = Checker::explicit_traffic2();
     auto traffic_buchi = Checker::defineTrafficBuchi(traffic);
 
     spot::print_dot(std::cout, traffic);
@@ -79,6 +80,8 @@ int main() {
     std::stack< state_pair > s = cross();
 
     std::cerr << s.size() << std::endl;
+
+    cross.trace();
 
     return 1;
 }
