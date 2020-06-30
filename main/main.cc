@@ -9,20 +9,21 @@
 int main() {
     Checker checker;
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
-    const proc N = 3;
+    const proc N = 2;
     // auto pk = std::make_shared<PetersonKripke>(N, dict);
     auto pk = std::make_shared<MyKripke>(N, dict);
 
     auto starvation = [=] (std::function<std::string(proc)> crit, std::function<std::string(proc)> wait) {
         std::ostringstream formula;
-
+        formula << "G( ";
         for(proc i = 0; i < N; i++) { //starvation free: any process tthat starts waiting, gets access
             if(i > 0)
                 formula << " && ";
 
-            formula << wait(i) << " -> F("
-                    << crit(i) << " && !" << wait(i) << ")";
+            formula << "(" << wait(i) << " -> F("
+                    << crit(i) << "))";
         }
+        formula << " )";
         return formula.str();
     };
 
@@ -54,16 +55,21 @@ int main() {
     Checker::verify( pk, mutex(critical) );
     std::cout << "STARVE" << std::endl;
     Checker::verify( pk, starvation(critical, waiting) );
-    Checker::verify( pk, "F(crit0 && crit 1)");
-    std::cout << "------------------------" << std::endl
-              << "MY TURN" << std::endl
-              << "------------------------" << std::endl;
+    // Checker::verify( pk, "G( wait0 -> F(crit0) )" );
+    // Checker::verify( pk, "F(crit0 && crit 1)");
+
+    // std::cout << "------------------------" << std::endl
+    //           << "MY TURN" << std::endl
+    //           << "------------------------" << std::endl;
+
     std::cout << "MUTEX" << std::endl;
     Checker::myVerify( pk, mutex(critical) );
     std::cout << "STARVE" << std::endl;
+    // Checker::myVerify( pk, " G(wait0 -> F(crit0)) " );
+    // spot::print_dot(std::cout, pk);
     Checker::myVerify( pk, starvation(critical, waiting) );
-
-    Checker::myVerify( pk, "F(crit0 && crit 1)");
+    // std::cout << "DOUBLE CRIT" << std::endl;
+    // Checker::myVerify( pk, "F(crit0 && crit 1)");
 
     // spot::print_dot(std::cout, checker.defineMutex3(pk));
     // spot::print_hoa(std::cout, checker.defineMutex3(pk));

@@ -1,5 +1,5 @@
 #include "cross_product.h"
-
+#include <dbg.h>
 CrossProduct::CrossProduct(const_Kripke A, const_explicit_Automaton B) : A_(A), B_(B) { }
 
 CrossProduct::~CrossProduct() {
@@ -110,28 +110,40 @@ bool CrossProduct::cycle_marked(const spot::state* s_acc, const spot::state* q_a
     while(!C.empty()) {
         spot::twa_succ_iterator* A_it = C_it.top().first;
         const spot::state* s = C.top().first;
-        const spot::state* t = A_it->dst();
 
         spot::twa_succ_iterator* B_it = C_it.top().second;
         const spot::state* q = C.top().second;
-        const spot::state* p = B_it->dst();
 
-        bdd L_t = A_->state_condition(t);
-        bdd q_p = B_it->cond();
-
-        increment(true);
-
-        if( (L_t & q_p) != bddfalse ) {
-            state_pair_equal eq; //equality functor
-
-            //check if we loop back to s_acc, q_acc
-            if( eq( std::make_pair(s_acc, q_acc), std::make_pair(t, p) ) || seen_marked.get_mark(t,p) ) {
-                C.push(seen_marked(t, p));
-                return true;
-            }
-
-            visit(t, p, true);
+        if(A_it->done()) {
+            A_->release_iter(A_it); B_->release_iter(B_it);
+            C.pop(); C_it.pop();
         }
+        else {
+            const spot::state* t = A_it->dst();
+            const spot::state* p = B_it->dst();
+
+            bdd L_t = A_->state_condition(t);
+            bdd q_p = B_it->cond();
+
+            increment(true);
+
+            if( (L_t & q_p) != bddfalse ) {
+                state_pair_equal eq; //equality functor
+                //check if we loop back to s_acc, q_acc or a predecessor
+                if( eq( std::make_pair(s_acc, q_acc), std::make_pair(t, p) ) || seen_marked.get_mark(t,p) ) {
+                    std::cerr << "TARGET: " << A_->format_state(s_acc) << std::endl;
+                    std::cerr << "CLOSE: " << A_->format_state(t) << std::endl;
+                    C.push(seen_marked(t, p));
+                    return true;
+                }
+
+                visit(t, p, true);
+            }
+            else {
+                t->destroy();
+                p->destroy();
+            }// L_t & q_p == bddfalse
+        }// !done()
     }
 
     return false;
@@ -189,7 +201,7 @@ bool CrossProduct::operator()() {
 bool CrossProduct::cross_marked() {
     seen_cycle.set_co_table(&seen_marked);
     computeInitial();
-    
+
     while(!I.empty()) {
         visit(I.top().first, I.top().second);
         I.pop();
@@ -200,40 +212,44 @@ bool CrossProduct::cross_marked() {
             // Transistion from A_
             spot::twa_succ_iterator* A_it = S_it.top().first;
             const spot::state* s = S.top().first;
-            const spot::state* t = A_it->dst();
             //Transition from B_
             spot::twa_succ_iterator* B_it = S_it.top().second;
             const spot::state* q = S.top().second;
-            const spot::state* p = B_it->dst();
 
-            //Get Label for t and transition label for q->p
-            bdd L_t = A_->state_condition(t);
-            bdd q_p = B_it->cond();
+            if(A_it->done()) { //outer loop as finished, we pop this state
+                A_->release_iter(A_it); B_->release_iter(B_it);
+                S.pop(); S_it.pop();
 
-            //TODO mark <s,q>
+                if( B_->state_is_accepting(q) ) {
+                    if(cycle_marked(s, q))
+                        return true;
 
-            //NOTE  all states and iterators must be fetched from their stacks
-            //      before incrementing.
-            bool end_dfs = increment();
-
-
-            //NOTE  check if Label(t) matches Label(q->p)
-            //      fetch necessary information before incrementing!
-            if( (L_t & q_p) != bddfalse ) //labels do not contradict
-                visit_marked(t, p);
+                    seen_marked.mark(s,q, false);
+                }
+            }// done()
             else {
-                t->destroy();
-                p->destroy();
-            }
-            //we popped the stacks and finished considering <s,q>
-            if( end_dfs && B_->state_is_accepting(q) ) {
-                if(cycle_marked(s, q))
-                    return true;
+                const spot::state* t = A_it->dst();
+                const spot::state* p = B_it->dst();
 
-                seen_marked.mark(s,q, false);
-            }
-        }
-    }
+                //Get Label for t and transition label for q->p
+                bdd L_t = A_->state_condition(t);
+                bdd q_p = B_it->cond();
+
+                //NOTE  all states and iterators must be fetched from their stacks
+                //      before incrementing.
+                increment();
+
+                //NOTE  check if Label(t) matches Label(q->p)
+                //      fetch necessary information before incrementing!
+                if( (L_t & q_p) != bddfalse ) //labels do not contradict
+                    visit_marked(t, p);
+                else {
+                    t->destroy();
+                    p->destroy();
+                }// L_t & q_p == bddfalse
+            }// !done()
+        }// while S
+    }// while I
 
     return false;
 }
@@ -257,9 +273,7 @@ bool CrossProduct::increment(bool cycle) {
         }
         else { //finished outer loop
             //NOTE state memory is managed by the cross_unicity_table
-            A_->release_iter(A_it); B_->release_iter(B_it);
-            stack.pop(); it_stack.pop();
-            return true; //move onto next DFS
+            return true;
         }
     }
 
