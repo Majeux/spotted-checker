@@ -12,6 +12,7 @@ MyKripke::MyKripke(size_t n, const spot::bdd_dict_ptr& d) : TemplateKripke(d), _
 }
 
 MyKripke::~MyKripke() {
+    std::cerr << "delete MyKripke" << std::endl;
     delete[] crit;
     delete[] wait;
 }

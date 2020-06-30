@@ -3,7 +3,6 @@
 
 #include "dbg.h"
 #include "checker.h"
-#include "cross_product.h"
 #include "peterson/kripke.h" //PetersonKripke
 #include "model_example/kripke.h" //MyKripke
 
@@ -12,7 +11,7 @@ int main() {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     const proc N = 3;
     // auto pk = std::make_shared<PetersonKripke>(N, dict);
-    // auto pk = std::make_shared<MyKripke>(N, dict);
+    auto pk = std::make_shared<MyKripke>(N, dict);
 
     auto starvation = [=] (std::function<std::string(proc)> crit, std::function<std::string(proc)> wait) {
         std::ostringstream formula;
@@ -48,40 +47,37 @@ int main() {
         return formula.str();
     };
 
-    // std::cerr << "Printing test kripke" << std::endl;
-    // spot::print_dot(std::cout, checker.explicit_door_kripke());
-    //
-    // std::cerr << std::endl << "Printing test kripke from file" << std::endl;
-    // model_info model;
-    //
-    // if(checker.read_kripke("kripkes/kripke-door", model))
-    //     spot::print_dot(std::cout, checker.make_explicit(model));
-    // else
-    //     std::cerr << "-- READ ERROR" << std::endl;
-    //
-    // std::cerr << std::endl << "-- done" << std::endl;
+    std::function<std::string(proc)> critical = std::bind(pk->critical_string, std::placeholders::_1);
+    std::function<std::string(proc)> waiting  = std::bind(pk->waiting_string, std::placeholders::_1);
 
-    // std::string formula = "G( (!crit0 && !crit1) || crit0 xor crit1)"; //mutex
-    // checker.verify( pk, mutex(std::bind(pk->critical_string, std::placeholders::_1)) );
+    std::cout << "MUTEX" << std::endl;
+    Checker::verify( pk, mutex(critical) );
+    std::cout << "STARVE" << std::endl;
+    Checker::verify( pk, starvation(critical, waiting) );
+    Checker::verify( pk, "F(crit0 && crit 1)");
+    std::cout << "------------------------" << std::endl
+              << "MY TURN" << std::endl
+              << "------------------------" << std::endl;
+    std::cout << "MUTEX" << std::endl;
+    Checker::myVerify( pk, mutex(critical) );
+    std::cout << "STARVE" << std::endl;
+    Checker::myVerify( pk, starvation(critical, waiting) );
 
-    // checker.verify(pk, starvation());
+    Checker::myVerify( pk, "F(crit0 && crit 1)");
 
     // spot::print_dot(std::cout, checker.defineMutex3(pk));
     // spot::print_hoa(std::cout, checker.defineMutex3(pk));
 
-    auto traffic = Checker::explicit_traffic2();
-    auto traffic_buchi = Checker::defineTrafficBuchi(traffic);
-
-    spot::print_dot(std::cout, traffic);
-    spot::print_dot(std::cout, traffic_buchi);
-
-    CrossProduct cross(traffic, traffic_buchi);
-
-    std::stack< state_pair > s = cross();
-
-    std::cerr << s.size() << std::endl;
-
-    cross.trace();
+    // auto traffic = Checker::explicit_traffic();
+    // auto traffic_buchi = Checker::defineTrafficBuchi(traffic);
+    //
+    // CrossProduct cross(traffic, traffic_buchi);
+    //
+    // std::stack< state_pair > s = cross();
+    // //
+    // std::cerr << s.size() << std::endl;
+    // //
+    // cross.trace();
 
     return 1;
 }
