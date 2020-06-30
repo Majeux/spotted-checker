@@ -35,21 +35,25 @@ void CrossProduct::computeInitial() {
     seen_marked.clear();
     seen_cycle.clear();
 
-    const spot::state* A_0 = A_->get_init_state();
     const spot::state* B_0 = B_->get_init_state();
+    spot::twa_succ_iterator* B_it = B_->succ_iter(B_0);
 
     //for all outgoing edges from B_0
-    spot::twa_succ_iterator* B_it = B_->succ_iter(B_0);
     if(B_it->first()) {
+        const spot::state* A_0 = A_->get_init_state();
+        bool placed = false;
+
         do {
             //add <A_0, q> if: B_0 --L(A_0)-> q
-            if( (A_->state_condition(A_0) & B_it->cond()) != bddfalse )
+            if( (A_->state_condition(A_0) & B_it->cond()) != bddfalse ) {
+                placed = true;
                 I.emplace(A_0, B_it->dst());
-
+            }
         } while(B_it->next());
+
+        if(!placed)
+            A_0->destroy();
     }
-    else 
-        A_0->destroy();
 
     B_->release_iter(B_it);
     B_0->destroy();
@@ -89,7 +93,7 @@ bool CrossProduct::cycle(const spot::state* s_acc, const spot::state* q_acc) {
             state_pair_equal eq; //equality functor
 
             if(eq( std::make_pair(s_acc, q_acc), std::make_pair(t, p) )) { //looped back to s_acc, q_acc
-                C.push(seen_cycle(t, p));
+                C.push(seen_marked(t, p));
                 return true;
             }
 
@@ -122,7 +126,7 @@ bool CrossProduct::cycle_marked(const spot::state* s_acc, const spot::state* q_a
 
             //check if we loop back to s_acc, q_acc
             if( eq( std::make_pair(s_acc, q_acc), std::make_pair(t, p) ) || seen_marked.get_mark(t,p) ) {
-                C.push(seen_cycle(t, p));
+                C.push(seen_marked(t, p));
                 return true;
             }
 
@@ -185,7 +189,7 @@ bool CrossProduct::operator()() {
 bool CrossProduct::cross_marked() {
     seen_cycle.set_co_table(&seen_marked);
     computeInitial();
-
+    
     while(!I.empty()) {
         visit(I.top().first, I.top().second);
         I.pop();
