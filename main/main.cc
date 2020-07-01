@@ -10,6 +10,7 @@ int main() {
     Checker checker;
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     const proc N = 3;
+    std::cout << "Peterson's with N = " << N << "___________________" << std::endl;
     // auto pk = std::make_shared<PetersonKripke>(N, dict);
     auto pk = std::make_shared<MyKripke>(N, dict);
     // spot::print_dot(std::cout, pk);
@@ -65,30 +66,33 @@ int main() {
     std::function<std::string(proc)> critical = std::bind(pk->critical_string, std::placeholders::_1);
     std::function<std::string(proc)> waiting  = std::bind(pk->waiting_string, std::placeholders::_1);
 
-    // std::cout << "MUTEX" << std::endl;
-    // Checker::spotVerify( pk, mutex(critical) );
+    std::cout << "MUTEX" << std::endl;
+    Checker::spotVerify( pk, mutex(critical) );
 
-    // std::cout << "STARVE" << std::endl;
-    // Checker::spotVerify( pk, starvation(critical, waiting) );
+    std::cout << "STARVE" << std::endl;
+    Checker::spotVerify( pk, starvation(critical, waiting) );
 
-    // std::cout << "DOUBLE CRIT" << std::endl;
-    // Checker::spotVerify( pk, "F(crit0 && crit 1)");
+    std::cout << "BOUNDED_WAITING" << std::endl;
+    Checker::spotVerify( pk, bounded_waiting(critical, waiting) );
+
+    std::cout << "DOUBLE CRIT" << std::endl;
+    Checker::spotVerify( pk, "F(crit0 && crit 1)");
 
     std::cout << "------------------------" << std::endl
               << "MY TURN" << std::endl
               << "------------------------" << std::endl;
 
-    // std::cout << "MUTEX" << std::endl;
-    // Checker::myVerify( pk, mutex(critical) );
+    std::cout << "MUTEX" << std::endl;
+    Checker::myVerify( pk, mutex(critical) );
 
     std::cout << "STARVE" << std::endl;
     Checker::myVerify( pk, starvation(critical, waiting) );
 
-    // std::cout << "DOUBLE CRIT" << std::endl;
-    // Checker::myVerify( pk, "F(crit0 && crit 1)");
+    std::cout << "BOUNDED_WAITING" << std::endl;
+    Checker::myVerify( pk, bounded_waiting(critical, waiting) );
 
-    // spot::print_dot(std::cout, checker.defineMutex3(pk));
-    // spot::print_hoa(std::cout, checker.defineMutex3(pk));
+    std::cout << "DOUBLE CRIT" << std::endl;
+    Checker::myVerify( pk, "F(crit0 && crit 1)");
 
     // auto traffic = Checker::explicit_traffic();
     // auto traffic_buchi = Checker::defineTrafficBuchi(traffic);
