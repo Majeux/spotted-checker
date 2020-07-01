@@ -72,7 +72,6 @@ TemplateState* MyIterator::dst() const {
     //shorthands for arrays
     const singles_list& p   = state.arrays[pc];
     const singles_list& lvl = state.arrays[level];
-    const singles_list& lte = state.arrays[last_to_enter];
 
     proc i = _i - 1;
     proc l = lvl[i];
