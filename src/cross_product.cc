@@ -21,7 +21,6 @@ CrossProduct::~CrossProduct() {
             C_it.pop();
         }
     }
-
 }
 
 void CrossProduct::computeInitial() {
@@ -50,7 +49,7 @@ void CrossProduct::computeInitial() {
             }
         } while(B_it->next());
 
-        if(!placed)
+        if(!placed) //A_0 is never managed by a unicity table, destroy manually
             A_0->destroy();
     }
 
@@ -72,14 +71,12 @@ void CrossProduct::print_trans(state_pair from, state_pair to) {
 }
 
 bool CrossProduct::cycle(const spot::state* s_acc, const spot::state* q_acc) {
-    visit(s_acc, q_acc, true);
+    visit(s_acc, q_acc, seen_cycle, C, C_it);
 
     while(!C.empty()) {
         spot::twa_succ_iterator* A_it = C_it.top().first;
-        const spot::state* s = C.top().a_;
 
         spot::twa_succ_iterator* B_it = C_it.top().second;
-        const spot::state* q = C.top().b_;
 
         if(A_it->done()) {
             A_->release_iter(A_it); B_->release_iter(B_it);
@@ -92,7 +89,7 @@ bool CrossProduct::cycle(const spot::state* s_acc, const spot::state* q_acc) {
             bdd L_t = A_->state_condition(t);
             bdd q_p = B_it->cond();
 
-            increment(true);
+            increment(A_it, B_it);
 
             if( (L_t & q_p) != bddfalse ) {
                 state_pair_equal eq; //equality functor
@@ -102,7 +99,7 @@ bool CrossProduct::cycle(const spot::state* s_acc, const spot::state* q_acc) {
                     return true;
                 }
 
-                visit(t, p, true);
+                visit(t, p, seen_cycle, C, C_it);
             }
             else {
                 t->destroy();
@@ -115,11 +112,13 @@ bool CrossProduct::cycle(const spot::state* s_acc, const spot::state* q_acc) {
 }
 
 bool CrossProduct::accept() {
+    //possible crossover between tables, prevent double destruction of states
     seen_cycle.set_co_table(&seen_marked);
+
     computeInitial();
 
     while(!I.empty()) {
-        visit(I.top().a_, I.top().b_);
+        visit(I.top().a_, I.top().b_, seen_marked, S, S_it);
         I.pop();
 
         while(!S.empty()) {
@@ -140,7 +139,7 @@ bool CrossProduct::accept() {
                 A_->release_iter(A_it); B_->release_iter(B_it);
                 S.pop(); S_it.pop();
 
-                seen_marked.mark(s,q, false);
+                seen_marked.mark(s,q, false); //unmark <s,q>, it is no longer on stack
             }// done()
             else {
                 const spot::state* t = A_it->dst();
@@ -152,11 +151,11 @@ bool CrossProduct::accept() {
 
                 //NOTE  all states and iterators must be fetched from their stacks
                 //      before incrementing but increment before visiting
-                increment();
+                increment(A_it, B_it);
 
                 //NOTE  check if Label(t) matches Label(q->p)
                 if( (L_t & q_p) != bddfalse )
-                    visit(t, p);
+                    visit(t, p, seen_marked, S, S_it);
                 else {
                     t->destroy();
                     p->destroy();
@@ -170,12 +169,7 @@ bool CrossProduct::accept() {
 
 
 /*  Advances the nested for loop over states ( A_ x B_ ) */
-void CrossProduct::increment(bool cycle) {
-    std::stack< iter_pair >&    it_stack    = cycle ? C_it : S_it;
-
-    spot::twa_succ_iterator* A_it = it_stack.top().first;
-    spot::twa_succ_iterator* B_it = it_stack.top().second;
-
+void CrossProduct::increment(spot::twa_succ_iterator* A_it, spot::twa_succ_iterator* B_it) {
     if(!B_it->next()) { //finished inner loop
         if(A_it->next()) { //continue outer loop
             //reset inner loop
@@ -188,23 +182,19 @@ void CrossProduct::increment(bool cycle) {
 /*  Push new pairs of states and iterators on their respective stacks
     if the two states have not been visited before.
     Increment must be called before visit. */
-void CrossProduct::visit(const spot::state* a, const spot::state* b, bool cycle) {
-    std::stack< state_pair >&   stack    = cycle ? C : S;
-    std::stack< iter_pair >&    it_stack = cycle ? C_it : S_it;
-    unicity_table_base* visited;
-    if(cycle)
-        visited = &seen_cycle;
-    else
-        visited = &seen_marked;
+void CrossProduct::visit(   const spot::state* a, const spot::state* b,
+                            unicity_table_base &visited,
+                            std::stack< state_pair > &state_stack,
+                            std::stack< iter_pair > &it_stack) {
 
-    state_pair cross_state = visited->is_new(a, b);
+    state_pair cross_state = visited.is_new(a, b);
 
     if( cross_state.a_ && cross_state.b_ ) { //was not visited before
         spot::twa_succ_iterator* A_it = A_->succ_iter(cross_state.a_ );
         spot::twa_succ_iterator* B_it = B_->succ_iter(cross_state.b_);
 
         if(A_it->first() && B_it->first()) {
-            stack.emplace(cross_state);
+            state_stack.emplace(cross_state);
             it_stack.emplace(A_it, B_it);
         }
         else {

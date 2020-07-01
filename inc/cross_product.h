@@ -31,8 +31,13 @@ class CrossProduct {
 
         void print_trans(state_pair from, state_pair to);
         void computeInitial();
-        void increment(bool cycle = false);
-        void visit(const spot::state* a, const spot::state* b, bool cycle = false);
+        void increment(spot::twa_succ_iterator* A_it, spot::twa_succ_iterator* B_it);
+
+        void visit( const spot::state* a, const spot::state* b,
+                    unicity_table_base &visited,
+                    std::stack< state_pair > &state_stack,
+                    std::stack< iter_pair > &it_stack  );
+
         bool cycle(const spot::state* s_acc, const spot::state* q_acc);
 
     public:
