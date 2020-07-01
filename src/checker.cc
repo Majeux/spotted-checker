@@ -241,16 +241,16 @@ explicit_Kripke Checker::make_explicit(const model_info& m) {
     return graph;
 }
 
-void Checker::verify(const_Kripke model, const std::string formula) {
+void Checker::spotVerify(const_Kripke model, const std::string formula) {
     spot::parsed_formula parsed = spot::parse_infix_psl(formula);
     spot::formula f = spot::formula::Not(parsed.f);
     explicit_Automaton f_auto = spot::translator(model->get_dict()).run(f);
 
     std::cout << "Formula: " << formula;
-    verify(model, f_auto);
+    spotVerify(model, f_auto);
 }
 
-void Checker::verify(const_Kripke model, explicit_Automaton neg_formula) {
+void Checker::spotVerify(const_Kripke model, explicit_Automaton neg_formula) {
 
     if(auto run = model->intersecting_run(neg_formula))
         std::cout << " violated by: \n" << *run << std::endl << std::endl;

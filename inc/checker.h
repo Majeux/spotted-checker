@@ -51,8 +51,8 @@ class Checker {
 
         static explicit_Automaton defineTrafficBuchi(const_Automaton model);
 
-        static void verify(const_Kripke model, const std::string formula);
-        static void verify(const_Kripke model, explicit_Automaton neg_formula);
+        static void spotVerify(const_Kripke model, const std::string formula);
+        static void spotVerify(const_Kripke model, explicit_Automaton neg_formula);
         static void myVerify(const_Kripke model, const std::string formula);
         static void myVerify(const_Kripke model, explicit_Automaton neg_formula);
 

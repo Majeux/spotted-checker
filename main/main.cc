@@ -66,13 +66,13 @@ int main() {
     std::function<std::string(proc)> waiting  = std::bind(pk->waiting_string, std::placeholders::_1);
 
     // std::cout << "MUTEX" << std::endl;
-    // Checker::verify( pk, mutex(critical) );
+    // Checker::spotVerify( pk, mutex(critical) );
 
     // std::cout << "STARVE" << std::endl;
-    // Checker::verify( pk, starvation(critical, waiting) );
+    // Checker::spotVerify( pk, starvation(critical, waiting) );
 
     // std::cout << "DOUBLE CRIT" << std::endl;
-    // Checker::verify( pk, "F(crit0 && crit 1)");
+    // Checker::spotVerify( pk, "F(crit0 && crit 1)");
 
     std::cout << "------------------------" << std::endl
               << "MY TURN" << std::endl
