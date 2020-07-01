@@ -12,8 +12,22 @@ int main() {
     const proc N = 3;
     // auto pk = std::make_shared<PetersonKripke>(N, dict);
     auto pk = std::make_shared<MyKripke>(N, dict);
-
+    // spot::print_dot(std::cout, pk);
     auto starvation = [=] (std::function<std::string(proc)> crit, std::function<std::string(proc)> wait) {
+        std::ostringstream formula;
+        formula << "G( ";
+        for(proc i = 0; i < N; i++) { //starvation free: any process tthat starts waiting, gets access
+            if(i > 0)
+                formula << " || ";
+
+            formula << "(" << wait(i) << " -> F("
+                    << crit(i) << "))";
+        }
+        formula << " )";
+        return formula.str();
+    };
+
+    auto bounded_waiting = [=] (std::function<std::string(proc)> crit, std::function<std::string(proc)> wait) {
         std::ostringstream formula;
         formula << "G( ";
         for(proc i = 0; i < N; i++) { //starvation free: any process tthat starts waiting, gets access
@@ -51,10 +65,12 @@ int main() {
     std::function<std::string(proc)> critical = std::bind(pk->critical_string, std::placeholders::_1);
     std::function<std::string(proc)> waiting  = std::bind(pk->waiting_string, std::placeholders::_1);
 
-    std::cout << "MUTEX" << std::endl;
-    Checker::verify( pk, mutex(critical) );
-    std::cout << "STARVE" << std::endl;
-    Checker::verify( pk, starvation(critical, waiting) );
+    // std::cout << "MUTEX" << std::endl;
+    // Checker::verify( pk, mutex(critical) );
+
+    // std::cout << "STARVE" << std::endl;
+    // Checker::verify( pk, starvation(critical, waiting) );
+
     // std::cout << "DOUBLE CRIT" << std::endl;
     // Checker::verify( pk, "F(crit0 && crit 1)");
 
@@ -62,10 +78,12 @@ int main() {
               << "MY TURN" << std::endl
               << "------------------------" << std::endl;
 
-    std::cout << "MUTEX" << std::endl;
-    Checker::myVerify( pk, mutex(critical) );
+    // std::cout << "MUTEX" << std::endl;
+    // Checker::myVerify( pk, mutex(critical) );
+
     std::cout << "STARVE" << std::endl;
     Checker::myVerify( pk, starvation(critical, waiting) );
+
     // std::cout << "DOUBLE CRIT" << std::endl;
     // Checker::myVerify( pk, "F(crit0 && crit 1)");
 
