@@ -118,87 +118,6 @@ const_Kripke Checker::explicit_traffic2() {
     return k;
 }
 
-//TODO check if presizing possible in vectors (based on N_STATES)
-// Read specification of a model from a file
-bool Checker::read_kripke(std::string filename, model_info& model) {
-    std::ifstream file (filename);
-
-    if (file.is_open()) {
-        std::string line;
-        // read S
-        if(!std::getline (file, line)) {
-            std::cerr << "-- ERROR: Missing line for N_States and Initial_State: " << filename << std::endl;
-            return false;
-        }
-
-        std::istringstream ss(line); std::string x;
-
-        if(ss >> model.States >> model.Initial) {
-            //Read Symbols
-            if(!std::getline (file, line)) {
-                std::cerr << "-- ERROR: Missing line for Symbols: " << filename << std::endl;
-                return false;
-            }
-            ss.clear();
-            ss.str(line);
-
-            while(ss >> x)
-                model.Symbols.push_back(x);
-
-            if(model.Symbols.size() == 0) {
-                std::cerr << "-- ERROR: Missing values for Symbols: " << filename << std::endl;
-                return false;
-            }
-
-            //Read Labels
-            for(State i = 0; i < model.States; i++) {
-                if(!std::getline (file, line)) {
-                    std::cerr << "-- ERROR: Missing line for Labels: " << filename << std::endl;
-                    return false;
-                }
-                ss.clear();
-                ss.str(line);
-                std::vector<bool> v; bool b;
-
-                for(uint32_t j = 0; j < model.Symbols.size(); j++) {
-                    if(ss >> b)
-                        v.push_back(b);
-                    else {
-                        std::cerr << "-- ERROR: Missing values for Labels: " << filename << std::endl;
-                        return false;
-                    }
-                }
-                model.Labels.push_back(v); v.clear();
-            }
-            //Read Transitions
-            for(State i = 0; i < model.States; i++) {
-                if(!std::getline (file, line)) {
-                    std::cerr << "-- ERROR: Missing line for Transitions: " << filename << std::endl;
-                    return false;
-                }
-                ss.clear();
-                ss.str(line);
-                std::vector<State> v; State s;
-
-                while(ss >> s)
-                    v.push_back(s);
-
-                model.Transitions.push_back(v); v.clear();
-            }
-        }
-        else {
-            std::cerr << "-- ERROR: Missing values for N_States or Initial_State: " << filename << std::endl;
-            return false;
-        }
-
-        file.close();
-        return true;
-    }
-
-    std::cout << "-- ERROR: Unable to open file: " << filename << std::endl;
-    return false;
-}
-
 // Create a Kripke graph from a specified model using the 'Explicit' method
 explicit_Kripke Checker::make_explicit(const model_info& m) {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
@@ -231,13 +150,7 @@ explicit_Kripke Checker::make_explicit(const model_info& m) {
 
     delete[] states;
     delete[] symbols;
-
-    //TODO add naming
-    /*
-    auto names = new std::vector<std::string> { "x0", "x1", "x2" };
-    k->set_named_prop("state-names", names);
-    */
-
+    
     return graph;
 }
 

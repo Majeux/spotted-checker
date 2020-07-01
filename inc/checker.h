@@ -38,7 +38,6 @@ class Checker {
     public:
         Checker();
         //Making explicit Kripke models
-        static bool read_kripke(std::string filename, model_info& model);
         static explicit_Kripke make_explicit(const model_info& m);
         static explicit_Kripke explicit_door_kripke();
         static const_Kripke explicit_traffic();
