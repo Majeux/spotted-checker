@@ -37,7 +37,6 @@ struct model_info {
 class Checker {
     public:
         Checker();
-
         //Making explicit Kripke models
         static bool read_kripke(std::string filename, model_info& model);
         static explicit_Kripke make_explicit(const model_info& m);
@@ -46,7 +45,6 @@ class Checker {
         static const_Kripke explicit_traffic2();
 
         //Making explicit property buchi automata
-        /* TODO Abstracts creation of buchi automaton with spot */
         static explicit_Automaton defineBuchi(const_Automaton model);
         /* Implementation of !mutex for 3 critical sections */
         static explicit_Automaton defineMutex3(const_Automaton model);
@@ -57,8 +55,8 @@ class Checker {
         static void verify(const_Kripke model, explicit_Automaton neg_formula);
         static void myVerify(const_Kripke model, const std::string formula);
         static void myVerify(const_Kripke model, explicit_Automaton neg_formula);
+
     private:
-        /* create new state number from two state numbers */
         static State crossState(State a, State b);
 
         static explicit_Automaton initBuchi( const_Automaton model,
@@ -67,8 +65,6 @@ class Checker {
         static explicit_Automaton buildBuchi(explicit_Automaton aut,
                                             const std::vector<State> &init,
                                             const std::vector<Edge> edges);
-
-        /* dfs acceptance */
 };
 
 #endif

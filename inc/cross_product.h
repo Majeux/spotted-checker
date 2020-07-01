@@ -18,7 +18,6 @@ class CrossProduct {
 
         //adaption of state_unicity_table that tracks seen state_pairs
         //initialialize any state_pair with seen(pair)
-        cross_unicity_table seen;
         marked_unicity_table seen_marked;
         cross_unicity_table seen_cycle;
 
@@ -32,18 +31,15 @@ class CrossProduct {
 
         void print_trans(state_pair from, state_pair to);
         void computeInitial();
-        bool increment(bool cycle = false);
+        void increment(bool cycle = false);
         void visit(const spot::state* a, const spot::state* b, bool cycle = false);
-        void visit_marked(const spot::state* a, const spot::state* b, bool cycle = false);
         bool cycle(const spot::state* s_acc, const spot::state* q_acc);
-        bool cycle_marked(const spot::state* s_acc, const spot::state* q_acc);
 
     public:
         CrossProduct(const_Kripke A, const_explicit_Automaton B);
         ~CrossProduct();
 
-        bool operator()();
-        bool cross_marked();
+        bool accept();
 
 
         void trace();

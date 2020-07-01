@@ -270,8 +270,7 @@ void Checker::myVerify(const_Kripke model, const std::string formula) {
 
 void Checker::myVerify(const_Kripke model, explicit_Automaton neg_formula) {
     CrossProduct cross(model, neg_formula);
-    if(cross.cross_marked()) {
-    // if(cross()) {
+    if(cross.accept()) {
         std::cout << " violated by: \n";
         cross.trace();
     }
