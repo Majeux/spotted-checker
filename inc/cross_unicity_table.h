@@ -4,50 +4,66 @@
 #include <spot/twa/twa.hh>
 
 #include <set>
+#include <map>
 
 #include "aliases.h"
+
+struct state_pair {
+    const spot::state* a_;
+    const spot::state* b_;
+
+    state_pair(const spot::state* a, const spot::state* b) : a_(a), b_(b) {}
+};
+
+struct state_tuple {
+    const spot::state* a_;
+    const spot::state* b_;
+    mutable bool* mark_;
+
+    state_tuple(const spot::state* a, const spot::state* b, bool* m) : a_(a), b_(b), mark_(m) {}
+
+    void set_mark(bool m) const { *mark_ = m; }
+};
 
 /*  Hash functor for hashing a pair of state pointers.
 Based on the boost hash_combine function, adapted for two hashes. */
 struct state_pair_hash {
     size_t operator()(state_pair s) const {
-        assert(s.first != nullptr); assert(s.second != nullptr);
+        assert(s.a_ != nullptr); assert(s.b_ != nullptr);
 
-        size_t h = s.first->hash() + 0x9e3779b9 + (0<<6) + (0>>2);
-        return h ^(s.second->hash() + 0x9e3779b9 + (h<<6) + (h>>2));
+        size_t h = s.a_->hash() + 0x9e3779b9 + (0<<6) + (0>>2);
+        return h ^(s.b_->hash() + 0x9e3779b9 + (h<<6) + (h>>2));
     }
 };
 
 struct state_pair_equal {
-    bool operator()(state_pair a, state_pair b) const {
-        assert(a.first != nullptr); assert(a.second != nullptr);
-        assert(b.first != nullptr); assert(b.second != nullptr);
+    bool operator()(state_pair l, state_pair r) const {
+        assert(l.a_ != nullptr); assert(l.b_ != nullptr);
+        assert(r.a_ != nullptr); assert(r.b_ != nullptr);
 
-        return a.first->compare(b.first) == 0 && a.second->compare(b.second) == 0;
+        return l.a_->compare(r.a_) == 0 && l.b_->compare(r.b_) == 0;
     }
 };
-
-using state_tuple = std::tuple< const spot::state*, const spot::state*, bool* >;
 
 /*  Hash functor for hashing a tuple of state pointers.
 Based on the boost hash_combine function, adapted for two hashes. */
-struct state_tuple_hash {
-    size_t operator()(state_tuple s) const {
-        assert(std::get<0>(s) != nullptr); assert(std::get<1>(s) != nullptr);
-
-        size_t h = std::get<0>(s)->hash() + 0x9e3779b9 + (0<<6) + (0>>2);
-        return h ^(std::get<1>(s)->hash() + 0x9e3779b9 + (h<<6) + (h>>2));
-    }
-};
-
-struct state_tuple_equal {
-    bool operator()(state_tuple a, state_tuple b) const {
-        assert(std::get<0>(a) != nullptr); assert(std::get<1>(a) != nullptr);
-        assert(std::get<0>(b) != nullptr); assert(std::get<1>(b) != nullptr);
-        //NOTE the boolean is not an identifier
-        return std::get<0>(a)->compare(std::get<0>(b)) == 0 && std::get<1>(a)->compare(std::get<1>(b)) == 0;
-    }
-};
+// struct state_tuple_hash {
+//     size_t operator()(state_tuple s) const {
+//         assert(s.a_ != nullptr); assert(s.b_ != nullptr);
+//
+//         size_t h = s.a_->hash() + 0x9e3779b9 + (0<<6) + (0>>2);
+//         return h ^(s.b_->hash() + 0x9e3779b9 + (h<<6) + (h>>2));
+//     }
+// };
+//
+// struct state_tuple_equal {
+//     bool operator()(state_tuple l, state_tuple r) const {
+//         assert(l.a_ != nullptr); assert(l.b_ != nullptr);
+//         assert(r.a_ != nullptr); assert(r.b_ != nullptr);
+//         //NOTE the boolean is not an identifier
+//         return l.a_->compare(r.a_) == 0 && l.b_->compare(r.b_) == 0;
+//     }
+// };
 
 
 class unicity_table_base {
@@ -55,13 +71,14 @@ class unicity_table_base {
         unicity_table_base* other = nullptr;
     public:
         void set_co_table(unicity_table_base* t) { other = t; }
-        virtual bool contains(state_pair) const = 0;
+        virtual bool contains(const spot::state* s1, const spot::state* s2) const = 0;
+        virtual bool contains(state_pair s) const = 0;
         virtual const state_pair operator()(const spot::state* s1,
                                             const spot::state* s2) = 0;
-        virtual const state_pair operator()(state_pair p) = 0;
+        virtual const state_pair operator()(state_pair s) = 0;
         virtual const state_pair is_new(const spot::state* s1,
                                         const spot::state* s2) = 0;
-        virtual const state_pair is_new(state_pair p) = 0;
+        virtual const state_pair is_new(state_pair s) = 0;
         virtual size_t size() const = 0;
 };
 
@@ -85,8 +102,8 @@ class cross_unicity_table : public unicity_table_base {
             return *p.first;
         }
 
-        const state_pair operator()(state_pair p) override  {
-            return operator()(p.first, p.second);
+        const state_pair operator()(state_pair s) override  {
+            return operator()(s.a_, s.b_);
         }
 
         const state_pair is_new(const spot::state* s1, const spot::state* s2) override {
@@ -94,29 +111,33 @@ class cross_unicity_table : public unicity_table_base {
             if(!p.second) {
                 s1->destroy();
                 s2->destroy();
-                return std::make_pair(nullptr,nullptr);
+                return {nullptr,nullptr};
             }
             return *p.first;
         }
 
-        const state_pair is_new(state_pair p) override {
-            return is_new(p.first, p.second);
+        const state_pair is_new(state_pair s) override {
+            return is_new(s.a_, s.b_);
         }
 
-        bool contains(state_pair p) const override {
-            return set.find(p) != set.end();
+        bool contains(const spot::state* s1, const spot::state* s2) const override {
+            return contains({s1, s2});
+        }
+
+        bool contains(state_pair s) const override {
+            return set.find(s) != set.end();
         }
 
         void flush() {
             for(cross_state_set::iterator i = set.begin(); i != set.end();) {
-                state_pair old = *(i++);
+                cross_state_set::iterator old = i++;
 
-                if(other == nullptr || !other->contains(old)) {
-                    if(old.first)
-                        old.first->destroy();
+                if(other == nullptr || !other->contains(*old)) {
+                    if(old->a_)
+                        old->a_->destroy();
 
-                    if(old.second)
-                        old.second->destroy();
+                    if(old->b_)
+                        old->b_->destroy();
                 }
             }
         }
@@ -138,92 +159,92 @@ class cross_unicity_table : public unicity_table_base {
     '<s,q>'.
 */
 class marked_unicity_table : public unicity_table_base {
-    using marked_state_set = std::unordered_set< state_tuple,
-                                                state_tuple_hash,
-                                                state_tuple_equal    >;
+    using marked_state_set = std::unordered_map< state_pair, bool,
+                                                state_pair_hash,
+                                                state_pair_equal    >;
     private:
         marked_state_set set;
 
     public:
         const state_pair operator()(const spot::state* s1, const spot::state* s2) override {
-            bool* mark = new bool(true); //mark as true when pushed = when registered
-            auto p = set.emplace(s1, s2, mark);
-            if(!p.second) {
-                s1->destroy();
-                s2->destroy();
-                delete mark;
-            }
-            return std::make_pair(std::get<0>(*p.first), std::get<1>(*p.first));
+            return operator()({s1, s2});
         }
 
-        const state_pair operator()(state_pair p) override {
-            return operator()(p.first, p.second);
+        const state_pair operator()(state_pair s) override {
+            //mark as true when pushed = when registered
+            auto p = set.emplace(s, true);
+            if(!p.second) {
+                s.a_->destroy();
+                s.b_->destroy();
+            }
+
+            return {p.first->first.a_, p.first->first.b_};
         }
 
         /*  Set the mark of a state_pair (usually to false)
             Returns null,null is the pair does not exist */
         state_pair mark(const spot::state* s1, const spot::state* s2, bool m) {
-            bool temp = false;
-            auto p = set.find(std::make_tuple(s1, s2, &temp));
+            return mark({s1, s2}, m);
+        }
+
+        const state_pair mark(state_pair s, bool m) {
+            marked_state_set::iterator p = set.find(s);
 
             if(p == set.end())
-                return std::make_pair(nullptr, nullptr);
+                return {nullptr, nullptr};
 
-            bool* mark = std::get<2>(*p);
-            *mark = m;
+            p->second = m;
 
-            return std::make_pair(std::get<0>(*p), std::get<1>(*p));
+            //TODO rm
+            // std::cerr << "mark set: " << p->second << std::endl;
+
+            return {p->first.a_, p->first.b_};
         }
 
-        const state_pair mark(state_pair p, bool m) {
-            return mark(p.first, p.second, m);
+        bool get_mark(const spot::state* s1, const spot::state* s2) const {
+            return get_mark({s1, s2});
         }
 
-        bool get_mark(const spot::state* s1, const spot::state* s2) {
-            bool temp = false;
-            auto p = set.find(std::make_tuple(s1, s2, &temp)); //bool doesnt matter
+        bool get_mark(state_pair s) const {
+            auto p = set.find(s); //bool doesnt matter
 
             if(p == set.end())
                 return false; //not yet seen states are always unmarked
 
-            return std::get<2>(*p);
-        }
-
-        bool get_mark(state_pair p) {
-            return get_mark(p.first, p.second);
+            return p->second;
         }
 
         const state_pair is_new(const spot::state* s1, const spot::state* s2) override {
-            bool* mark = new bool(true);
-            auto p = set.emplace(s1, s2, mark);
+            return is_new({s1, s2});
+        }
+
+        const state_pair is_new(state_pair s) override {
+            auto p = set.emplace(s, true);
+
             if(!p.second) { //not new
-                s1->destroy();
-                s2->destroy();
-                delete mark;
-                return std::make_pair(nullptr,nullptr);
+                s.a_->destroy();
+                s.b_->destroy();
+                return {nullptr,nullptr};
             }
-            return std::make_pair(std::get<0>(*p.first), std::get<1>(*p.first));
+
+            return {p.first->first.a_, p.first->first.b_};
         }
 
-        const state_pair is_new(state_pair p) override {
-            return is_new(p.first, p.second);
+        bool contains(const spot::state* s1, const spot::state* s2) const override {
+            return contains({s1, s2});
         }
 
-        bool contains(state_pair p) const override {
-            bool temp = true;
-            state_tuple t = std::make_tuple(p.first, p.second, &temp);
-            return set.find(t) != set.end();
+        bool contains(state_pair s) const override {
+            return set.find(s) != set.end();
         }
 
         void flush() {
             for(marked_state_set::iterator i = set.begin(); i != set.end();) {
-                state_tuple old = *(i++);
-                if(std::get<0>(old))
-                    std::get<0>(old)->destroy();
-                if(std::get<1>(old))
-                    std::get<1>(old)->destroy();
-
-                delete std::get<2>(old);
+                marked_state_set::iterator old = i++;
+                if(old->first.a_)
+                    old->first.a_->destroy();
+                if(old->first.b_)
+                    old->first.b_->destroy();
             }
         }
 

@@ -263,7 +263,7 @@ void Checker::myVerify(const_Kripke model, const std::string formula) {
     spot::formula f = spot::formula::Not(parsed.f);
     explicit_Automaton f_auto = spot::translator(model->get_dict()).run(f);
 
-    std::cout << "Formula: " << formula << std::endl;
+    std::cout << "Formula: " << formula;
     // spot::print_dot(std::cout, f_auto);
     myVerify(model, f_auto);
 }

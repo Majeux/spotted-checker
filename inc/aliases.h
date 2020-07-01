@@ -14,8 +14,6 @@ using explicit_Automaton          = spot::twa_graph_ptr;
 using const_explicit_Automaton    = spot::const_twa_graph_ptr;
 using State                       = uint32_t;
 
-using state_pair = std::pair<   const spot::state*,
-                                const spot::state*  >;
 using iter_pair  = std::pair<   spot::twa_succ_iterator*,
                                 spot::twa_succ_iterator*    >;
 #endif
