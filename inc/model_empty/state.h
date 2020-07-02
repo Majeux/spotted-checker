@@ -11,18 +11,18 @@ class ModelState : public TemplateState {
             here as normal.
         */
 
-        /*  This class contains identifying variables (of type proc) for a state
+        /*  This class contains identifying variables (of type proc_t) for a state
             TODO define them in state_vars.h
             Access them through the 'TemplateIterator::state' member
         */
 
         /*  Access a variable 'NAME' with: */
                 //state.singles[NAME] = 0;
-                //proc x = state.singles[NAME] + 1;
+                //proc_t x = state.singles[NAME] + 1;
 
         /*  Access an element 'i' in array 'NAME' with: */
                 //state.arrays[NAME][i] = 0;
-                //proc x = state.arrays[NAME][i] + 1;
+                //proc_t x = state.arrays[NAME][i] + 1;
 
         /*  Get the size pf array 'NAME' with: */
                 //state.indices[NAME]

@@ -6,9 +6,9 @@
 
 class MyKripke: public TemplateKripke {
     private:
-        const proc _N;
-        bdd* crit; //is process i < _N in critical section (for verifying mutex)
-        bdd* wait; //is process i < _N waiting to access critical section (for verifying non-starvation)
+        const proc_t _N;
+        bdd* crit; //is proc_tess i < _N in critical section (for verifying mutex)
+        bdd* wait; //is proc_tess i < _N waiting to access critical section (for verifying non-starvation)
 
         TemplateIterator* makeIterator(const spot::state* s, bdd condition) const override;
 
@@ -23,9 +23,9 @@ class MyKripke: public TemplateKripke {
 
         std::string format_state(const spot::state* s) const override;
 
-        static std::string critical_string(proc i);
+        static std::string critical_string(proc_t i);
 
-        static std::string waiting_string(proc i);
+        static std::string waiting_string(proc_t i);
 };
 
 #endif

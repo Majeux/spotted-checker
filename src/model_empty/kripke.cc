@@ -12,14 +12,14 @@ ModelState* ModelKripke::get_init_state() const {
     return nullptr;
 }
 
-/* Example of using two proc values to create a state condition */
+/* Example of using two proc_t values to create a state condition */
 bdd ModelKripke::state_condition(const spot::state* s) const {
     //Convert parent class pointer to child pointer
     const ModelState* state = static_cast<const ModelState*>(s);
     bdd cond1, cond2;
 
-    proc some_value = 1;  //obtained from s
-    proc other_value = 0; //obtained from s
+    proc_t some_value = 1;  //obtained from s
+    proc_t other_value = 0; //obtained from s
 
     if(some_value == 1) cond1 = some_property;
     else cond1 = !some_property;

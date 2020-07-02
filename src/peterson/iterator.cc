@@ -6,11 +6,11 @@ PetersonState* PetersonIterator::dst() const {
     assert(_i <= _N);
     assert(_i > 0);
 
-    proc i = _i - 1;
-    proc l = level[i];
+    proc_t i = _i - 1;
+    proc_t l = level[i];
     //prepare search for greater level than level[i]
     auto begin = level.begin(), end = level.end();
-    auto E_greater = [=, k = proc(0)] (proc k_val) mutable {
+    auto E_greater = [=, k = proc_t(0)] (proc_t k_val) mutable {
         return k++ != i && k_val >= l;
     };
     //containers are copy constructed in PetersonState,

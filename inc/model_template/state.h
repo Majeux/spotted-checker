@@ -14,11 +14,11 @@ class TemplateState : public spot::state {
         state_variables state;
 
     public:
-        TemplateState(  proc var, proc initial_var,
-                        proc  ar, singles_list initial_ar,
-                        singles_list sizes) : state(var, initial_var,
-                                                    ar, initial_ar,
-                                                    sizes) { }
+        TemplateState(  proc_t var, proc_t initial_var,
+                        proc_t  ar, singles_list initial_ar,
+                        bound_list sizes) : state(var, initial_var,
+                                                  ar, initial_ar,
+                                                  sizes) { }
 
         TemplateState(const state_variables* sv) : state(sv) { }
 
@@ -30,8 +30,8 @@ class TemplateState : public spot::state {
         // compare imposes a total order on the state_variables
         int compare(const spot::state* other) const override;
 
-        const singles_list* getVars() const { return &(state.variables); }
-        const arrays_list*  getArrays() const { return &(state.arrays); }
+        const singles_list* getVars() const { return &(state.variables_); }
+        const arrays_list*  getArrays() const { return &(state.arrays_); }
         const state_variables* getStateVars() const { return &state; }
 };
 

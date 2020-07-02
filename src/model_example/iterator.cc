@@ -10,21 +10,21 @@ bool MyIterator::first() {
     assert(_N > 0);
     count = 0;
 
-    const singles_list& c   = state.arrays[pc];
-    const singles_list& lvl = state.arrays[level];
-    const singles_list& lte = state.arrays[last_to_enter];
-    proc p;
+    const singles_list& c   = state.arrays_[pc];
+    const singles_list& lvl = state.arrays_[level];
+    const singles_list& lte = state.arrays_[last_to_enter];
+    proc_t p;
     auto begin = lvl.begin(), end = lvl.end();
 
     bool i_set = false;
     for(p = _N; p != 0; p--) {
-        proc l = lvl[p-1];
-        auto E_greater = [&, k = proc(0)] (proc k_val) mutable {
+        proc_t l = lvl[p-1];
+        auto E_greater = [&, k = proc_t(0)] (proc_t k_val) mutable {
             return k++ != p-1 && k_val >= l;
         };
 
         if(c[p-1] == 3 && lte[l] == p-1 && std::any_of(begin, end, E_greater) ) {
-            do_i[p-1] = false; //A process in pc = 3, has no edge if it is waiting
+            do_i[p-1] = false; //A proc_tess in pc = 3, has no edge if it is waiting
         }
         else {
             do_i[p-1] = true;
@@ -56,7 +56,7 @@ bool MyIterator::next() {
     } while(!do_i[_i-1]);
 
     assert(do_i[_i-1]);
-    return true; //switch to next process
+    return true; //switch to next proc_tess
 }
 
 bool MyIterator::done() const {
@@ -70,11 +70,11 @@ TemplateState* MyIterator::dst() const {
     assert(do_i[_i-1]);
 
     //shorthands for arrays
-    const singles_list& p   = state.arrays[pc];
-    const singles_list& lvl = state.arrays[level];
+    const singles_list& p   = state.arrays_[pc];
+    const singles_list& lvl = state.arrays_[level];
 
-    proc i = _i - 1;
-    proc l = lvl[i];
+    proc_t i = _i - 1;
+    proc_t l = lvl[i];
     //prepare search for greater level than level[i]
 
     //containers are copy constructed in MyState,
@@ -103,7 +103,7 @@ TemplateState* MyIterator::dst() const {
             break;
         case 3: //loop wait
             //wait is handled by do_i array set in first()
-            assign.push_back({level, i, (proc)(l+1)});
+            assign.push_back({level, i, (proc_t)(l+1)});
             assign.push_back({pc, i, 1});
 
             break;

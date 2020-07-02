@@ -271,7 +271,7 @@ explicit_Automaton Checker::defineBuchi(const_Automaton model) {
 }
 
 //complement of 3 v/ariable mutex:
-//eventually there are two processes in their critical section
+//eventually there are two proc_tesses in their critical section
 explicit_Automaton Checker::defineMutex3(const_Automaton model) {
     unsigned n_states       = 2;
     State initial_state     = 0;

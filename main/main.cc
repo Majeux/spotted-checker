@@ -9,17 +9,17 @@
 int main() {
     Checker checker;
 
-    const proc N = 3;
+    const proc_t N = 3;
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     std::cout << "Peterson's with N = " << (long)N << "\n___________________" << std::endl;
     // auto pk = std::make_shared<PetersonKripke>(N, dict);
     auto pk = std::make_shared<MyKripke>(N, dict);
     // spot::print_dot(std::cout, pk);
 
-    auto starvation = [=] (std::function<std::string(proc)> crit, std::function<std::string(proc)> wait) {
+    auto starvation = [=] (std::function<std::string(proc_t)> crit, std::function<std::string(proc_t)> wait) {
         std::ostringstream formula;
         formula << "G( ";
-        for(proc i = 0; i < N; i++) { //starvation free: any process tthat starts waiting, gets access
+        for(proc_t i = 0; i < N; i++) { //starvation free: any proc_tess tthat starts waiting, gets access
             if(i > 0)
                 formula << " || ";
 
@@ -30,10 +30,10 @@ int main() {
         return formula.str();
     };
 
-    auto bounded_waiting = [=] (std::function<std::string(proc)> crit, std::function<std::string(proc)> wait) {
+    auto bounded_waiting = [=] (std::function<std::string(proc_t)> crit, std::function<std::string(proc_t)> wait) {
         std::ostringstream formula;
         formula << "G( ";
-        for(proc i = 0; i < N; i++) { //starvation free: any process tthat starts waiting, gets access
+        for(proc_t i = 0; i < N; i++) { //starvation free: any proc_tess tthat starts waiting, gets access
             if(i > 0)
                 formula << " && ";
 
@@ -44,7 +44,7 @@ int main() {
         return formula.str();
     };
 
-    auto mutex = [=] (std::function<std::string(proc)> crit) {
+    auto mutex = [=] (std::function<std::string(proc_t)> crit) {
         std::ostringstream formula;
 
         formula << "G( ";
@@ -65,8 +65,8 @@ int main() {
         return formula.str();
     };
 
-    std::function<std::string(proc)> critical = std::bind(pk->critical_string, std::placeholders::_1);
-    std::function<std::string(proc)> waiting  = std::bind(pk->waiting_string, std::placeholders::_1);
+    std::function<std::string(proc_t)> critical = std::bind(pk->critical_string, std::placeholders::_1);
+    std::function<std::string(proc_t)> waiting  = std::bind(pk->waiting_string, std::placeholders::_1);
 
     // std::cout << "MUTEX" << std::endl;
     // Checker::spotVerify( pk, mutex(critical) );

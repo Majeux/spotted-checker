@@ -7,13 +7,13 @@
 
 class PetersonIterator: public spot::kripke_succ_iterator {
     private:
-        const proc _N; //number of processes, constant among states/iterators
-        proc _i;       //iterator through processes
+        const proc_t _N; //number of proc_tesses, constant among states/iterators
+        proc_t _i;       //iterator through proc_tesses
 
         //State identifiers
-        std::vector<proc> pc; //track what state/line of peterson we are in
-        std::vector<proc> level; //TODO write as c array with lexographic <=>
-        std::vector<proc> last_to_enter;
+        std::vector<proc_t> pc; //track what state/line of peterson we are in
+        std::vector<proc_t> level; //TODO write as c array with lexographic <=>
+        std::vector<proc_t> last_to_enter;
 
     public:
         PetersonIterator(const PetersonState* s, bdd cond) :
@@ -31,7 +31,7 @@ class PetersonIterator: public spot::kripke_succ_iterator {
 
         bool next() override {
             assert(_i > 0);
-            return --_i > 0; //switch to next process
+            return --_i > 0; //switch to next proc_tess
         }
 
         bool done() const override {

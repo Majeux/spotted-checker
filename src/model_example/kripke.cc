@@ -30,14 +30,14 @@ TemplateIterator* MyKripke::makeIterator(const spot::state* s, bdd condition) co
     return new MyIterator(state, condition);
 }
 
-/*  Track if a process is in its critical section to verify mutex
-    Track if a process is waiting to enter a critical section to verify non-starvation
+/*  Track if a proc_tess is in its critical section to verify mutex
+    Track if a proc_tess is waiting to enter a critical section to verify non-starvation
 */
 bdd MyKripke::state_condition(const spot::state* s) const {
     const MyState* state = static_cast<const MyState*>(s);
 
-    const std::vector<proc>* p  = state->get(pc);
-    const std::vector<proc>* lvl = state->get(level);
+    const std::vector<proc_t>* p  = state->get(pc);
+    const std::vector<proc_t>* lvl = state->get(level);
 
     bdd crit_condition = (*p)[0] == 4 ? crit[0] : !crit[0];
     bdd wait_condition = (*lvl)[0] > -1 && (*p)[0] < 4 ? wait[0] : !wait[0];
@@ -50,24 +50,24 @@ bdd MyKripke::state_condition(const spot::state* s) const {
     return crit_condition & wait_condition;
 }
 
-/*  We only case about our state_variable elements. Casting to long int would support larger proc sizes. */
+/*  We only case about our state_variable elements. Casting to long int would support larger proc_t sizes. */
 std::string MyKripke::format_state(const spot::state* s) const {
     auto state = static_cast<const MyState*>(s);
     std::ostringstream out;
     const state_variables* sv = state->getStateVars();
 
     out << "pc = [ ";
-    for(auto i : sv->arrays[pc] )
+    for(auto i : sv->arrays_[pc] )
         out << (long int)i << ", ";
     out << " ]" << std::endl
         << "level = [ ";
 
-    for(auto i : sv->arrays[level] )
+    for(auto i : sv->arrays_[level] )
         out << (long int)i << ", ";
     out << " ] "
         << "last_to_enter = [ ";
 
-    for(auto i : sv->arrays[last_to_enter] )
+    for(auto i : sv->arrays_[last_to_enter] )
         out << (long int)i << ", ";
     out << " ]" << std::endl;
 
@@ -75,13 +75,13 @@ std::string MyKripke::format_state(const spot::state* s) const {
 }
 
 /*  Auxiliary functions that define a format for our property names */
-std::string MyKripke::critical_string(proc i) {
+std::string MyKripke::critical_string(proc_t i) {
     std::string critical = "crit";
     critical += '0' + i;
     return critical;
 }
 
-std::string MyKripke::waiting_string(proc i) {
+std::string MyKripke::waiting_string(proc_t i) {
     std::string waiting = "wait";
     waiting += '0' + i;
     return waiting;

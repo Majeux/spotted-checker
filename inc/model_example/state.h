@@ -7,7 +7,7 @@
 class MyState : public TemplateState {
     private:
         /*  Universal/internal variables (among states) */
-        const proc _N;
+        const proc_t _N;
 
         /*  This class has access to the identifying variables (defined in state_vars.h) through the 'state_variables state' member in TemplateState */
 
@@ -16,15 +16,15 @@ class MyState : public TemplateState {
         //Get the size pf array 'NAME' with:         state.indices[NAME]
 
     public:
-        MyState(proc n);
+        MyState(proc_t n);
         MyState(const MyState* s);
-        MyState(proc n, const state_variables &sv, std::vector<assignment> &ass);
+        MyState(proc_t n, const state_variables &sv, std::vector<assignment> &ass);
 
         //construct a new copy of this state
         MyState* clone() const override;
 
-        proc getN() const { return _N; }
-        const singles_list* get(ARRAY_VAR name) const { return &(state.arrays[name]); }
+        proc_t getN() const { return _N; }
+        const singles_list* get(ARRAY_VAR name) const { return &(state.arrays_[name]); }
 };
 
 

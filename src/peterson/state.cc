@@ -9,7 +9,7 @@ size_t PetersonState::hash() const {
 
     size_t h = FNV_OFFSET;
     //we only XOR and multiply, can treat signed char as unsigned
-    auto fnv1a = [&h] (proc i) { h ^= i; h *= FNV_PRIME; };
+    auto fnv1a = [&h] (proc_t i) { h ^= i; h *= FNV_PRIME; };
 
     std::for_each(pc.begin(), pc.end(), fnv1a);
     std::for_each(level.begin(), level.end(), fnv1a);
@@ -33,7 +33,7 @@ int PetersonState::compare(const spot::state* other) const {
     return last_to_enter > o->last_to_enter; //first ==, second ==
  }
 
- bool* PetersonState::getInCrit(proc N) const {
+ bool* PetersonState::getInCrit(proc_t N) const {
      assert(N > 0);
      assert((size_t)N == level.size());
      bool* in_crit = new bool[N];

@@ -5,9 +5,9 @@
 
 class PetersonKripke: public spot::kripke {
     private:
-        const proc _N;
-        bdd* crit; //is process i < _N in critical section (for verifying mutex)
-        bdd* wait; //is process i < _N waiting to access critical section (for verifying non-starvation)
+        const proc_t _N;
+        bdd* crit; //is proc_tess i < _N in critical section (for verifying mutex)
+        bdd* wait; //is proc_tess i < _N waiting to access critical section (for verifying non-starvation)
 
     public:
         PetersonKripke(size_t n, const spot::bdd_dict_ptr& d)
@@ -53,8 +53,8 @@ class PetersonKripke: public spot::kripke {
         {
             const PetersonState* state = static_cast<const PetersonState*>(s);
 
-            const std::vector<proc>* pc  = state->getPC();
-            const std::vector<proc>* lvl = state->getLVL();
+            const std::vector<proc_t>* pc  = state->getPC();
+            const std::vector<proc_t>* lvl = state->getLVL();
 
             bdd crit_condition = (*pc)[0] == 4 ? crit[0] : !crit[0];
             bdd wait_condition = (*lvl)[0] > -1 && (*lvl)[0] < 4 ? wait[0] : !wait[0];
@@ -84,13 +84,13 @@ class PetersonKripke: public spot::kripke {
             return out.str();
         }
 
-        static std::string critical_string(proc i) {
+        static std::string critical_string(proc_t i) {
             std::string critical = "crit";
             critical += '0' + i;
             return critical;
         }
 
-        static std::string waiting_string(proc i) {
+        static std::string waiting_string(proc_t i) {
             std::string waiting = "wait";
             waiting += '0' + i;
             return waiting;

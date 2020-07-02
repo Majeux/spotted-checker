@@ -6,10 +6,10 @@
 
 class MyIterator : public TemplateIterator {
     private:
-        const proc _N; //number of processes, constant among states/iterators
-        proc count;     //number of outgoing edges
-        proc _i;       //iterator through processes
-        bool* do_i;  //if process _i has an edge
+        const proc_t _N; //number of proc_tesses, constant among states/iterators
+        proc_t count;     //number of outgoing edges
+        proc_t _i;       //iterator through proc_tesses
+        bool* do_i;  //if proc_tess _i has an edge
 
         /*  This class has access to the identifying variables (defined in state_vars.h) through the 'state_variables state' member in TemplateState */
 
