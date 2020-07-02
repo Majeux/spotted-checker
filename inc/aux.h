@@ -50,6 +50,7 @@ struct state_variables {
         return *this;
     }
 
+    /*  variable access operators */
     proc_t& operator()(size_t single_name) {
         return variables_[single_name];
     }
@@ -58,6 +59,7 @@ struct state_variables {
         return variables_[single_name];
     }
 
+    /*  array variable access operators */
     proc_t& operator()(size_t arr_name, size_t i) {
         assert(i < bounds_[arr_name]);
         return arrays_[arr_name][i];
@@ -68,11 +70,20 @@ struct state_variables {
         return arrays_[arr_name][i];
     }
 
+    /*  array data access operators */
     singles_list& data(size_t arr_name) {
         return arrays_[arr_name];
     }
 
     const singles_list& data(size_t arr_name) const {
+        return arrays_[arr_name];
+    }
+
+    singles_list& operator&(size_t arr_name) {
+        return arrays_[arr_name];
+    }
+
+    const singles_list& operator&(size_t arr_name) const {
         return arrays_[arr_name];
     }
 };

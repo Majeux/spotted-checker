@@ -57,17 +57,17 @@ std::string MyKripke::format_state(const spot::state* s) const {
     const state_variables& sv = state->getStateVars();
 
     out << "pc = [ ";
-    for(auto i : sv.arrays_[pc] )
+    for(auto i : sv&pc )
         out << (long int)i << ", ";
     out << " ]" << std::endl
         << "level = [ ";
 
-    for(auto i : sv.arrays_[level] )
+    for(auto i : sv&level )
         out << (long int)i << ", ";
     out << " ] "
         << "last_to_enter = [ ";
 
-    for(auto i : sv.arrays_[last_to_enter] )
+    for(auto i : sv&last_to_enter )
         out << (long int)i << ", ";
     out << " ]" << std::endl;
 

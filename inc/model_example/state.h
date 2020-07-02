@@ -16,7 +16,7 @@ class MyState : public TemplateState {
         //Get the size pf array 'NAME' with:         state.indices[NAME]
 
     public:
-        MyState(proc_t n);
+        MyState(bound_t n);
         MyState(const MyState* s);
         MyState(proc_t n, const state_variables &sv, std::vector<assignment> &ass);
 

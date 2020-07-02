@@ -1,8 +1,8 @@
 #include "model_example/state.h"
 
-MyState::MyState(proc_t n) : TemplateState(N_VARS, -1,
+MyState::MyState(bound_t n) : TemplateState(N_VARS, -1,
                                          N_ARRAYS, {0, -1, 0},
-                                         { n, n, (proc_t)(n-1) } ), _N(n)
+                                         { n, n, bound_t(n-1) } ), _N(n)
 {
     assert(n > 0);
 }
@@ -13,9 +13,9 @@ MyState::MyState(proc_t n, const state_variables &sv, std::vector<assignment> &a
                                                         : TemplateState(sv), _N(n) {
     for(assignment a : ass) {
         if(a.array < 0)
-            state.variables_[a.index] = a.value;
+            state(a.index) = a.value;
         else
-            state.arrays_[a.array][a.index] = a.value;
+            state(a.array, a.index) = a.value;
     }
 }
 

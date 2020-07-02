@@ -11,7 +11,7 @@ bool MyIterator::first() {
     count = 0;
 
     proc_t p;
-    auto begin = state.data(level).begin(), end = state.data(level).end();
+    auto begin = (state&level).begin(), end = (state&level).end();
 
     bool i_set = false;
     for(p = _N; p != 0; p--) {
@@ -40,8 +40,7 @@ bool MyIterator::next() {
     if(done())
         return false;
 
-    assert(_i > 0);
-    assert(count > 0);
+    assert(_i > 0); assert(count > 0);
 
     if(--count == 0)
         return false;
@@ -61,24 +60,19 @@ bool MyIterator::done() const {
 }
 
 TemplateState* MyIterator::dst() const {
-    assert(_i <= _N);
-    assert(_i > 0);
+    assert(_i <= _N); assert(_i > 0);
     assert(count > 0);
     assert(do_i[_i-1]);
 
-    //shorthands for arrays
-    const singles_list& p   = state.arrays_[pc];
-    const singles_list& lvl = state.arrays_[level];
-
     proc_t i = _i - 1;
-    proc_t l = lvl[i];
+    proc_t l = state(level, i);
     //prepare search for greater level than level[i]
 
     //containers are copy constructed in MyState,
     //delay assignment until after
     std::vector<assignment> assign;
 
-    switch (p[i]) {
+    switch (state(pc, i)) {
         case 0: //initialize loop
             assign.push_back({level, i, 0});
             assign.push_back({pc, i, 1});
@@ -100,7 +94,7 @@ TemplateState* MyIterator::dst() const {
             break;
         case 3: //loop wait
             //wait is handled by do_i array set in first()
-            assign.push_back({level, i, (proc_t)(l+1)});
+            assign.push_back({level, i, proc_t(l+1)});
             assign.push_back({pc, i, 1});
 
             break;
