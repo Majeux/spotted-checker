@@ -210,6 +210,12 @@ void CrossProduct::trace() {
     std::stack< state_pair > s_print;
     std::stack< state_pair > c_print;
 
+    state_pair link;
+    if(!c.empty()) {
+        link.a_ = c.top().a_;
+        link.b_ = c.top().b_;
+    }
+
     while(!s.empty() || !c.empty()) {
         if(!s.empty()) {
             s_print.push(s.top());
@@ -220,23 +226,26 @@ void CrossProduct::trace() {
             c.pop();
         }
     }
-
-    std::cerr << "Path:\n";
+    state_pair_equal eq; //equality functor
+    std::cerr << "######################\n\tPath:\n######################\n";
     while(!s_print.empty()) {
         const spot::state* s = s_print.top().a_;
 
+        if( eq(link, s_print.top()) )
+            std::cout << "\t\t\t\t\t\t<---- Cycle loops back here!" << std::endl;
         std::cout << A_->format_state(s) << " | ";
         spot::bdd_print_formula(std::cout, A_->get_dict(), A_->state_condition(s));
         std::cout << std::endl << "\t------>" << std::endl;
 
         s_print.pop();
     }
-    std::cout << "_____________________\nCycle\n";
+    std::cout << "######################\n\tCycle to Path\n######################\n";
     while(!c_print.empty()) {
         const spot::state* s = c_print.top().a_;
 
         std::cout << A_->format_state(s) << " | ";
         spot::bdd_print_formula(std::cout, A_->get_dict(), A_->state_condition(s));
+        std::cout << std::endl << B_->format_state(c_print.top().b_) << " = buchi state" << std::endl;
         std::cout << std::endl << "\t------>" << std::endl;
 
         c_print.pop();

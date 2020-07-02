@@ -12,6 +12,7 @@ struct state_pair {
     const spot::state* a_;
     const spot::state* b_;
 
+    state_pair() : a_(nullptr), b_(nullptr) {}
     state_pair(const spot::state* a, const spot::state* b) : a_(a), b_(b) {}
 };
 
@@ -38,8 +39,9 @@ struct state_pair_hash {
 
 struct state_pair_equal {
     bool operator()(state_pair l, state_pair r) const {
-        assert(l.a_ != nullptr); assert(l.b_ != nullptr);
-        assert(r.a_ != nullptr); assert(r.b_ != nullptr);
+        if( l.a_ == nullptr || l.b_ == nullptr ||
+            r.a_ == nullptr || r.b_ == nullptr  )
+        return false;
 
         return l.a_->compare(r.a_) == 0 && l.b_->compare(r.b_) == 0;
     }
