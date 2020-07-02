@@ -23,8 +23,8 @@ class TemplateIterator: public spot::kripke_succ_iterator {
             //other variables are invariant among iterators
             //or are auxiliary
 
-            state.variables_ = *(s->getVars());
-            state.arrays_ = *(s->getArrays());
+            state.variables_ = s->getVars();
+            state.arrays_ = s->getArrays();
             //indices should remain constant throughout states
 
             spot::kripke_succ_iterator::recycle(cond);

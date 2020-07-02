@@ -36,15 +36,15 @@ TemplateIterator* MyKripke::makeIterator(const spot::state* s, bdd condition) co
 bdd MyKripke::state_condition(const spot::state* s) const {
     const MyState* state = static_cast<const MyState*>(s);
 
-    const std::vector<proc_t>* p  = state->get(pc);
-    const std::vector<proc_t>* lvl = state->get(level);
+    const std::vector<proc_t>& p  = state->get(pc);
+    const std::vector<proc_t>& lvl = state->get(level);
 
-    bdd crit_condition = (*p)[0] == 4 ? crit[0] : !crit[0];
-    bdd wait_condition = (*lvl)[0] > -1 && (*p)[0] < 4 ? wait[0] : !wait[0];
+    bdd crit_condition = p[0] == 4 ? crit[0] : !crit[0];
+    bdd wait_condition = lvl[0] > -1 && p[0] < 4 ? wait[0] : !wait[0];
 
     for(size_t i = 1; i < (size_t)_N; i++) {
-        crit_condition &= (*p)[i] == 4 ? crit[i] : !crit[i];
-        wait_condition &= (*lvl)[i] > -1 && (*p)[i] < 4 ? wait[i] : !wait[i];
+        crit_condition &= p[i] == 4 ? crit[i] : !crit[i];
+        wait_condition &= lvl[i] > -1 && p[i] < 4 ? wait[i] : !wait[i];
     }
 
     return crit_condition & wait_condition;
@@ -54,20 +54,20 @@ bdd MyKripke::state_condition(const spot::state* s) const {
 std::string MyKripke::format_state(const spot::state* s) const {
     auto state = static_cast<const MyState*>(s);
     std::ostringstream out;
-    const state_variables* sv = state->getStateVars();
+    const state_variables& sv = state->getStateVars();
 
     out << "pc = [ ";
-    for(auto i : sv->arrays_[pc] )
+    for(auto i : sv.arrays_[pc] )
         out << (long int)i << ", ";
     out << " ]" << std::endl
         << "level = [ ";
 
-    for(auto i : sv->arrays_[level] )
+    for(auto i : sv.arrays_[level] )
         out << (long int)i << ", ";
     out << " ] "
         << "last_to_enter = [ ";
 
-    for(auto i : sv->arrays_[last_to_enter] )
+    for(auto i : sv.arrays_[last_to_enter] )
         out << (long int)i << ", ";
     out << " ]" << std::endl;
 

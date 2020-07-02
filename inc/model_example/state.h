@@ -24,7 +24,7 @@ class MyState : public TemplateState {
         MyState* clone() const override;
 
         proc_t getN() const { return _N; }
-        const singles_list* get(ARRAY_VAR name) const { return &(state.arrays_[name]); }
+        const singles_list& get(ARRAY_VAR name) const { return state.arrays_[name]; }
 };
 
 

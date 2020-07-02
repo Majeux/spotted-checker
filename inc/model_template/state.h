@@ -30,9 +30,9 @@ class TemplateState : public spot::state {
         // compare imposes a total order on the state_variables
         int compare(const spot::state* other) const override;
 
-        const singles_list* getVars() const { return &(state.variables_); }
-        const arrays_list*  getArrays() const { return &(state.arrays_); }
-        const state_variables* getStateVars() const { return &state; }
+        const singles_list& getVars() const { return state.variables_; }
+        const arrays_list&  getArrays() const { return state.arrays_; }
+        const state_variables& getStateVars() const { return state; }
 };
 
 #endif
