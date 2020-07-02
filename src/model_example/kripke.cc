@@ -40,11 +40,11 @@ bdd MyKripke::state_condition(const spot::state* s) const {
     const std::vector<proc>* lvl = state->get(level);
 
     bdd crit_condition = (*p)[0] == 4 ? crit[0] : !crit[0];
-    bdd wait_condition = (*lvl)[0] > -1 && (*lvl)[0] < 4 ? wait[0] : !wait[0];
+    bdd wait_condition = (*lvl)[0] > -1 && (*p)[0] < 4 ? wait[0] : !wait[0];
 
     for(size_t i = 1; i < (size_t)_N; i++) {
         crit_condition &= (*p)[i] == 4 ? crit[i] : !crit[i];
-        wait_condition &= (*lvl)[i] > -1 && (*lvl)[i] < 4 ? wait[i] : !wait[i];
+        wait_condition &= (*lvl)[i] > -1 && (*p)[i] < 4 ? wait[i] : !wait[i];
     }
 
     return crit_condition & wait_condition;
