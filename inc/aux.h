@@ -59,12 +59,12 @@ struct state_variables {
     }
 
     proc_t& operator()(size_t arr_name, size_t i) {
-        assert(i < bounds_[i]);
+        assert(i < bounds_[arr_name]);
         return arrays_[arr_name][i];
     }
 
     const proc_t& operator()(size_t arr_name, size_t i) const {
-        assert(i < bounds_[i]);
+        assert(i < bounds_[arr_name]);
         return arrays_[arr_name][i];
     }
 
