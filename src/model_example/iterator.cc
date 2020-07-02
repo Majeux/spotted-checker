@@ -10,20 +10,17 @@ bool MyIterator::first() {
     assert(_N > 0);
     count = 0;
 
-    const singles_list& c   = state.arrays_[pc];
-    const singles_list& lvl = state.arrays_[level];
-    const singles_list& lte = state.arrays_[last_to_enter];
     proc_t p;
-    auto begin = lvl.begin(), end = lvl.end();
+    auto begin = state.data(level).begin(), end = state.data(level).end();
 
     bool i_set = false;
     for(p = _N; p != 0; p--) {
-        proc_t l = lvl[p-1];
+        proc_t l = state(level, p-1);
         auto E_greater = [&, k = proc_t(0)] (proc_t k_val) mutable {
             return k++ != p-1 && k_val >= l;
         };
 
-        if(c[p-1] == 3 && lte[l] == p-1 && std::any_of(begin, end, E_greater) ) {
+        if(state(pc, p-1) == 3 && state(last_to_enter, l) == p-1 && std::any_of(begin, end, E_greater) ) {
             do_i[p-1] = false; //A proc_tess in pc = 3, has no edge if it is waiting
         }
         else {
