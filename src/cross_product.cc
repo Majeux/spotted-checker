@@ -111,6 +111,50 @@ bool CrossProduct::cycle(const spot::state* s_acc, const spot::state* q_acc) {
     return false;
 }
 
+void CrossProduct::crosspop() {
+    spot::twa_succ_iterator* A_it = S_it.top().first;
+    spot::twa_succ_iterator* B_it = S_it.top().second;
+
+    A_->release_iter(A_it); B_->release_iter(B_it);
+    S.pop(); S_it.pop();
+}
+
+void CrossProduct::crossDFS() {
+    computeInitial();
+
+    while(!I.empty()) {
+        visit(I.top().a_, I.top().b_, seen_marked, S, S_it);
+        I.pop();
+
+        while(!S.empty()) {
+            assert(S.size() == S_it.size());
+
+            spot::twa_succ_iterator* A_it = S_it.top().first;
+            spot::twa_succ_iterator* B_it = S_it.top().second;
+
+            //NOTE current state is <s,q>
+            const spot::state* s = S.top().a_;
+            const spot::state* q = S.top().b_;
+
+            if(A_it->done()) { //all successors in 's' x 'q' visited
+                crosspop();
+            }// done()
+            else {
+                //TODO check if <t,p> (in 'next(s) x next(q)') is in next(<s,q>)
+                const spot::state* t = A_it->dst();
+                const spot::state* p = B_it->dst();
+
+                //TODO if( <t,p> (in 'next(s) x next(q)') is in next(<s,q>) )
+                    //visit(t, p, seen_marked, S, S_it);
+
+                //advances loop over 'next(s) X next(q)'
+                increment(A_it, B_it);
+
+            }// !done()
+        }// while S
+    }// while I
+}
+
 bool CrossProduct::accept() {
     //possible crossover between tables, prevent double destruction of states
     seen_cycle.set_co_table(&seen_marked);
@@ -136,9 +180,7 @@ bool CrossProduct::accept() {
                     if(cycle(s, q))
                         return true;
 
-                A_->release_iter(A_it); B_->release_iter(B_it);
-                S.pop(); S_it.pop();
-
+                crosspop();
                 seen_marked.mark(s,q, false); //unmark <s,q>, it is no longer on stack
             }// done()
             else {
@@ -149,17 +191,16 @@ bool CrossProduct::accept() {
                 bdd L_t = A_->state_condition(t);
                 bdd q_p = B_it->cond();
 
-                //NOTE  all states and iterators must be fetched from their stacks
-                //      before incrementing but increment before visiting
-                increment(A_it, B_it);
-
-                //NOTE  check if Label(t) matches Label(q->p)
+                //check if Label(t) matches Label(q->p)
                 if( (L_t & q_p) != bddfalse )
                     visit(t, p, seen_marked, S, S_it);
-                else {
+                else { //states are not managed by unicity table, destroy manually
                     t->destroy();
                     p->destroy();
                 }// L_t & q_p == bddfalse
+
+                //advances loop over 'next(s) X next(q)'
+                increment(A_it, B_it);
             }// !done()
         }// while S
     }// while I
