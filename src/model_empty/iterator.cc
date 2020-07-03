@@ -15,7 +15,7 @@ bool ModelIterator::done() const {
     return false;
 }
 
-TemplateState* ModelIterator::dst() const {
+AbstractState* ModelIterator::dst() const {
     //TODO
     return nullptr;
 }

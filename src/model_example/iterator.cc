@@ -11,16 +11,16 @@ bool MyIterator::first() {
     count = 0;
 
     proc_t p;
-    auto begin = (state&level).begin(), end = (state&level).end();
+    auto begin = (sv &level).begin(), end = (sv &level).end();
 
     bool i_set = false;
     for(p = _N; p != 0; p--) {
-        proc_t l = state(level, p-1);
+        proc_t l = sv(level, p-1);
         auto E_greater = [&, k = proc_t(0)] (proc_t k_val) mutable {
             return k++ != p-1 && k_val >= l;
         };
 
-        if(state(pc, p-1) == 3 && state(last_to_enter, l) == p-1 && std::any_of(begin, end, E_greater) ) {
+        if(sv(pc, p-1) == 3 && sv(last_to_enter, l) == p-1 && std::any_of(begin, end, E_greater) ) {
             do_i[p-1] = false; //A proc_tess in pc = 3, has no edge if it is waiting
         }
         else {
@@ -59,20 +59,20 @@ bool MyIterator::done() const {
     return count == 0;
 }
 
-TemplateState* MyIterator::dst() const {
+AbstractState* MyIterator::dst() const {
     assert(_i <= _N); assert(_i > 0);
     assert(count > 0);
     assert(do_i[_i-1]);
 
     proc_t i = _i - 1;
-    proc_t l = state(level, i);
+    proc_t l = sv(level, i);
     //prepare search for greater level than level[i]
 
     //containers are copy constructed in MyState,
     //delay assignment until after
     std::vector<assignment> assign;
 
-    switch (state(pc, i)) {
+    switch (sv(pc, i)) {
         case 0: //initialize loop
             assign.push_back({level, i, 0});
             assign.push_back({pc, i, 1});
@@ -105,5 +105,5 @@ TemplateState* MyIterator::dst() const {
             break;
     }
 
-    return new MyState(_N, state, assign);
+    return new MyState(_N, sv, assign);
 }

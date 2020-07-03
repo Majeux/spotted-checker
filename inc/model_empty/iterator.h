@@ -1,13 +1,13 @@
 #ifndef MODEL_IT_H
 #define MODEL_IT_H
 
-#include "model_template/iterator.h"
+#include "model_abstract/iterator.h"
 #include "model_empty/state.h"
 
-/*  This class will iterate over all outgoing edges from a state. The state we
+/*  This class will iterate over all outgoing edges from a sv. The state we
     consider is defined by the pointer passed at construction.
 */
-class ModelIterator : public TemplateIterator {
+class ModelIterator : public AbstractIterator {
     private:
         /*  TODO
             Define variables that are invariant among or independent of a State
@@ -16,22 +16,22 @@ class ModelIterator : public TemplateIterator {
 
         /*  This class contains identifying variables (of type proc_t) for a state
             TODO define them in state_vars.h
-            Access them through the 'TemplateIterator::state' member
+            Access them through the 'AbstractIterator::state' member
         */
 
         /*  Access a variable 'NAME' with: */
                 //state.singles[NAME] = 0;
-                //proc_t x = state.singles[NAME] + 1;
+                //proc_t x = sv.singles[NAME] + 1;
 
         /*  Access an element 'i' in array 'NAME' with: */
                 //state.arrays[NAME][i] = 0;
-                //proc_t x = state.arrays[NAME][i] + 1;
+                //proc_t x = sv.arrays[NAME][i] + 1;
 
         /*  Get the size pf array 'NAME' with: */
                 //state.indices[NAME]
 
     public:
-        ModelIterator(const ModelState* s, bdd cond) : TemplateIterator(s, cond) { }
+        ModelIterator(const ModelState* s, bdd cond) : AbstractIterator(s, cond) { }
 
         /*  TODO
             Initialize the iteratorto consider the first edge (if it exists)
@@ -53,7 +53,7 @@ class ModelIterator : public TemplateIterator {
             Return a new state corresponding to the edge that
             the iterator is currently considering
         */
-        TemplateState* dst() const override;
+        AbstractState* dst() const override;
 };
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef STATE_TEMPLATE_H
-#define STATE_TEMPLATE_H
+#ifndef STATE_ABSTRACT_H
+#define STATE_ABSTRACT_H
 
 #include <spot/kripke/kripke.hh>
 
@@ -9,20 +9,20 @@
     functions for a spot::state in order to simplify model implementation.
     The implemented functions are mostly independent from a model implementation. And with the proper use of the state_variables struct and "state_vars.h" file, they are in fact invariant.
 */
-class TemplateState : public spot::state {
+class AbstractState : public spot::state {
     protected:
-        state_variables state;
+        state_variables sv;
 
     public:
-        TemplateState(  proc_t var, proc_t initial_var,
+        AbstractState(  proc_t var, proc_t initial_var,
                         proc_t  ar, singles_list initial_ar,
-                        bound_list sizes) : state(var, initial_var,
+                        bound_list sizes) : sv(var, initial_var,
                                                   ar, initial_ar,
                                                   sizes) { }
 
-        TemplateState(const state_variables* sv) : state(sv) { }
+        AbstractState(const state_variables* s) : sv(s) { }
 
-        TemplateState(const state_variables &sv) : state(sv) { }
+        AbstractState(const state_variables &s) : sv(s) { }
 
         //creates a hash based on the state_variables
         size_t hash() const override;
@@ -30,9 +30,9 @@ class TemplateState : public spot::state {
         // compare imposes a total order on the state_variables
         int compare(const spot::state* other) const override;
 
-        const singles_list& getVars() const { return state.variables_; }
-        const arrays_list&  getArrays() const { return state.arrays_; }
-        const state_variables& getStateVars() const { return state; }
+        const singles_list& getVars() const { return sv.variables_; }
+        const arrays_list&  getArrays() const { return sv.arrays_; }
+        const state_variables& getStateVars() const { return sv; }
 };
 
 #endif

@@ -1,10 +1,10 @@
 #ifndef MODEL_KRIPKE_H
 #define MODEL_KRIPKE_H
 
-#include "model_template/kripke.h"
+#include "model_abstract/kripke.h"
 #include "model_empty/iterator.h"
 
-class ModelKripke: public TemplateKripke {
+class ModelKripke: public AbstractKripke {
     private:
         /*  TODO
             Represent properties of a state using 'bdd' variables
@@ -17,10 +17,10 @@ class ModelKripke: public TemplateKripke {
             load a state into the ModelIterator. The initial internal state of
             the iterator should be set by the ModelIterator::first() function.
         */
-        TemplateIterator* makeIterator(const spot::state* s, bdd condition) const override;
+        AbstractIterator* makeIterator(const spot::state* s, bdd condition) const override;
 
     public:
-        ModelKripke(const spot::bdd_dict_ptr& d) : TemplateKripke(d) {
+        ModelKripke(const spot::bdd_dict_ptr& d) : AbstractKripke(d) {
             //TODO
             some_property = bdd_ithvar( register_ap("some_name") );
             some_property = bdd_ithvar( register_ap("other_name") );

@@ -2,7 +2,7 @@
 
 
 /* Should create a valid iterator based on state by default, loads the sate_variables into the iterator */
-TemplateIterator* ModelKripke::makeIterator(const spot::state* s, bdd condition) const {
+AbstractIterator* ModelKripke::makeIterator(const spot::state* s, bdd condition) const {
     //Convert parent class pointer to child pointer
     const ModelState* state = static_cast<const ModelState*>(s);
     return new ModelIterator(state, condition);

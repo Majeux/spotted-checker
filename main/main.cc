@@ -68,8 +68,8 @@ int main() {
     std::function<std::string(proc_t)> critical = std::bind(pk->critical_string, std::placeholders::_1);
     std::function<std::string(proc_t)> waiting  = std::bind(pk->waiting_string, std::placeholders::_1);
 
-    // std::cout << "MUTEX" << std::endl;
-    // Checker::spotVerify( pk, mutex(critical) );
+    std::cout << "MUTEX" << std::endl;
+    Checker::spotVerify( pk, mutex(critical) );
     //
     // std::cout << "STARVE" << std::endl;
     // Checker::spotVerify( pk, starvation(critical, waiting) );
@@ -84,8 +84,8 @@ int main() {
     //           << "MY TURN" << std::endl
     //           << "------------------------" << std::endl;
 
-    // std::cout << "MUTEX" << std::endl;
-    // Checker::myVerify( pk, mutex(critical) );
+    std::cout << "MUTEX" << std::endl;
+    Checker::myVerify( pk, mutex(critical) );
     //
     // std::cout << "STARVE" << std::endl;
     // Checker::myVerify( pk, starvation(critical, waiting) );

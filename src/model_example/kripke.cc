@@ -1,6 +1,6 @@
 #include "model_example/kripke.h"
 
-MyKripke::MyKripke(size_t n, const spot::bdd_dict_ptr& d) : TemplateKripke(d), _N(n) {
+MyKripke::MyKripke(size_t n, const spot::bdd_dict_ptr& d) : AbstractKripke(d), _N(n) {
     assert(_N > 0);
     crit = new bdd[_N];
     wait = new bdd[_N];
@@ -21,11 +21,11 @@ MyState* MyKripke::get_init_state() const {
     return new MyState(_N);
 }
 
-/*  Wrapper is needed because TemplateIterator cannot be constructed as an
-    abstract class. Simply allocate our implementation of TemplateIterator
+/*  Wrapper is needed because AbstractIterator cannot be constructed as an
+    abstract class. Simply allocate our implementation of AbstractIterator
     and return.
 */
-TemplateIterator* MyKripke::makeIterator(const spot::state* s, bdd condition) const {
+AbstractIterator* MyKripke::makeIterator(const spot::state* s, bdd condition) const {
     const MyState* state = static_cast<const MyState*>(s);
     return new MyIterator(state, condition);
 }

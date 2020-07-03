@@ -15,6 +15,22 @@ struct state_variables {
     arrays_list  arrays_;    //Holds all arrays used
     bound_list   bounds_;   //Holds lengths of the elements of 'arrays'
 
+    /*  Access a variable with token 'VAR_NAME' using the ()-operator:
+            sv(VAR_NAME) = 0
+            x = sv(VAR_NAME) + 1
+
+        Access an element 'i' in array 'ARR_NAME' using the ()-operator:
+            sv(ARR_NAME, i) = 0
+            x = sv(ARR_NAME, i) + 1
+
+        Get a reference to the underlying vector of our 'ARR_NAME' with:
+            std::vector<proc_t>& a = sv.data(ARR_NAME);
+        Or: std::vector<proc_t>& a = state&ARRAY;
+
+        Get the size of array 'ARR_NAME' with:
+            sv.size(ARR_NAME)
+    */
+
     //default construction with known vector bounds
     state_variables(proc_t vars, proc_t arrs, bound_list bounds)
                     :  variables_(vars), arrays_(arrs), bounds_(bounds) {
@@ -85,6 +101,11 @@ struct state_variables {
 
     const singles_list& operator&(size_t arr_name) const {
         return arrays_[arr_name];
+    }
+
+    /*  array size access operators */
+    bound_t size(size_t arr_name) const {
+        return bounds_[arr_name];
     }
 };
 

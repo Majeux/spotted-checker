@@ -6,9 +6,7 @@
 #include <spot/twa/bddprint.hh>
 
 #include "aliases.h"
-// #include "cross_state.h"
 #include "cross_unicity_table.h"
-// #include "marked_unicity_table.h"
 
 class CrossProduct {
     private:
