@@ -38,7 +38,8 @@ Checker::Checker() {
     std::cerr << "-- create Checker" << std::endl;
 }
 
-// CREATE MODEL
+/*  Creates a small explicit model: push a button -> opens a door -> walk through
+    the door. Used for testing. */
 explicit_Kripke Checker::explicit_door_kripke() {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     explicit_Kripke k = spot::make_kripke_graph(dict);
@@ -69,6 +70,8 @@ explicit_Kripke Checker::explicit_door_kripke() {
     return k;
 }
 
+/*  Creates a small explicit model: Traffic light, either red or green
+    Used for testing. */
 const_Kripke Checker::explicit_traffic() {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     explicit_Kripke k = spot::make_kripke_graph(dict);
@@ -91,6 +94,8 @@ const_Kripke Checker::explicit_traffic() {
     return k;
 }
 
+/*  Creates a small explicit model: Traffic light, either off, red or green
+    Used for testing. */
 const_Kripke Checker::explicit_traffic2() {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     explicit_Kripke k = spot::make_kripke_graph(dict);
@@ -118,7 +123,8 @@ const_Kripke Checker::explicit_traffic2() {
     return k;
 }
 
-// Create a Kripke graph from a specified model using the 'Explicit' method
+/*  Create a Kripke graph from a specified model using the 'Explicit' method
+    Abstracts a Spot functionality */
 explicit_Kripke Checker::make_explicit(const model_info& m) {
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     spot::kripke_graph_ptr graph = spot::make_kripke_graph(dict);
@@ -154,6 +160,8 @@ explicit_Kripke Checker::make_explicit(const model_info& m) {
     return graph;
 }
 
+/*  Parse an LTL string using the Spot translator and convert its negation
+    into an automaton */
 void Checker::spotVerify(const_Kripke model, const std::string formula) {
     spot::parsed_formula parsed = spot::parse_infix_psl(formula);
     spot::formula f = spot::formula::Not(parsed.f);
@@ -163,24 +171,30 @@ void Checker::spotVerify(const_Kripke model, const std::string formula) {
     spotVerify(model, f_auto);
 }
 
+/*  Use spot to compute an intersecting run betmeen the model and Buchi automaton
+    If none exists, the inverse of the Buchi is not always true
+    Else this inverse always holds */
 void Checker::spotVerify(const_Kripke model, explicit_Automaton neg_formula) {
-
     if(auto run = model->intersecting_run(neg_formula))
         std::cout << " violated by: \n" << *run << std::endl << std::endl;
     else
         std::cout << " verified" << std::endl <<  std::endl;
 }
 
+/*  Parse an LTL string using the Spot translator and convert its negation
+    into an automaton */
 void Checker::myVerify(const_Kripke model, const std::string formula) {
     spot::parsed_formula parsed = spot::parse_infix_psl(formula);
     spot::formula f = spot::formula::Not(parsed.f);
     explicit_Automaton f_auto = spot::translator(model->get_dict()).run(f);
 
     std::cout << "Formula: " << formula;
-    // spot::print_dot(std::cout, f_auto);
     myVerify(model, f_auto);
 }
 
+/*  Use CrossProduct to compute an intersecting run betmeen the model and Buchi
+    automaton If none exists, the inverse of the Buchi is not always true
+    Else this inverse always holds */
 void Checker::myVerify(const_Kripke model, explicit_Automaton neg_formula) {
     CrossProduct cross(model, neg_formula);
     if(cross.accept()) {
@@ -189,11 +203,11 @@ void Checker::myVerify(const_Kripke model, explicit_Automaton neg_formula) {
     }
     else
         std::cout << " verified" << std::endl <<  std::endl;
-
 }
 
+/*  Uses Spot to initialize a Buchi automaton with 'n' states and an initial
+    state 'init'. Returns a pointer to this automaton.  */
 explicit_Automaton Checker::initBuchi(const_Automaton model, unsigned n, State init) {
-    //Initialize automaton
     explicit_Automaton aut = spot::make_twa_graph(model->get_dict());
     aut->prop_state_acc(true); //Sets state based acceptance
     aut->set_buchi(); //Sets accepting condition for Buchi
@@ -235,43 +249,8 @@ explicit_Automaton Checker::buildBuchi(explicit_Automaton aut, const std::vector
     return aut;
 }
 
-//TODO Define an explicit Buchi automata representing some property we wish to check
-explicit_Automaton Checker::defineBuchi(const_Automaton model) {
-    //TODO define states used
-    unsigned n_states       = 2; //numbered from 0 ... n-1
-
-    //TODO define an initial state
-    State initial_state     = 0;
-
-    //TODO define accepting states
-    //NOTE an accepting state must have outgoing transitions
-    std::vector<State> accepting_states = { 0 };
-
-    //intitializes our automata in spot
-    explicit_Automaton automata = initBuchi(model, n_states, initial_state);
-
-    bdd True = !bdd();
-    bdd False = bdd();
-    //TODO define some propery variables used in the transitions
-    //NOTE property names should correspond to the ones in the model
-    bdd property1 = bdd_ithvar(automata->register_ap("property1"));
-    bdd property2 = bdd_ithvar(automata->register_ap("property2"));
-
-    //TODO define the edges in our automaton
-    //NOTE construct an edge with {from State, to State, bdd property}
-    std::vector<Edge> edges =
-    {
-        { 0, 1,  property1 & !property2 },
-        { 0, 0, !property1 },
-        { 1, 1, True }
-        /* ... */
-    };
-
-    return buildBuchi(automata, accepting_states, edges);
-}
-
-//complement of 3 v/ariable mutex:
-//eventually there are two proc_tesses in their critical section
+/*  Example, complement of 3 process mutex:
+    i.e. eventually there are two proc_tesses in their critical section */
 explicit_Automaton Checker::defineMutex3(const_Automaton model) {
     unsigned n_states       = 2;
     State initial_state     = 0;
@@ -316,6 +295,42 @@ explicit_Automaton Checker::defineTrafficBuchi(const_Automaton model) {
         { 1, 1, !green },
         { 1, 2, green },
         { 2, 2, True}
+    };
+
+    return buildBuchi(automata, accepting_states, edges);
+}
+
+/*  TODO Template for defining an explicit Buchi automata representing
+    some property we wish to check */
+explicit_Automaton Checker::defineBuchi(const_Automaton model) {
+    //TODO define states used
+    unsigned n_states; //numbered from 0 ... n-1
+
+    //TODO define an initial state
+    State initial_state;
+
+    //TODO define accepting states
+    //NOTE an accepting state must have outgoing transitions
+    std::vector<State> accepting_states;
+
+    //intitializes our automata in spot
+    explicit_Automaton automata = initBuchi(model, n_states, initial_state);
+
+    bdd True = bddtrue;
+    bdd False = bddfalse;
+    //TODO define some propery variables used in the transitions
+    //NOTE property names should correspond to the ones in the model
+    bdd property1 = bdd_ithvar(automata->register_ap("property1"));
+    bdd property2 = bdd_ithvar(automata->register_ap("property2"));
+
+    //TODO define the edges in our automaton
+    //NOTE construct an edge with {from State, to State, bdd property}
+    std::vector<Edge> edges =
+    {
+        { 0, 1,  property1 & !property2 },
+        { 0, 0, !property1 },
+        { 1, 1, True }
+        /* ... */
     };
 
     return buildBuchi(automata, accepting_states, edges);

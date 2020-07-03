@@ -14,20 +14,26 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <stack>
-#include <algorithm>
 
 #include "cross_product.h"
 #include "aliases.h"
 
+using State = uint32_t;
+
 struct Edge { State from; State to; bdd cond; };
 
+/*  Simple struct that can be used to explicitly define a kripke model
+    by passing it to make_explicit(). Mostly for small models during testing */
 struct model_info {
+    /*  Number of states */
     State States;
+
     State Initial;
 
     std::vector<std::string>          Symbols;
+    /*  For each state: for each symbol denote which ones are true */
     std::vector< std::vector<bool> >  Labels;
+    /*  For each state: a vector of all states it has a transition to */
     std::vector< std::vector<State> > Transitions;
 
     friend std::ostream& operator << (std::ostream& os, const model_info& m);
@@ -45,11 +51,10 @@ class Checker {
 
         //Making explicit property buchi automata
         static explicit_Automaton defineBuchi(const_Automaton model);
-        /* Implementation of !mutex for 3 critical sections */
         static explicit_Automaton defineMutex3(const_Automaton model);
-
         static explicit_Automaton defineTrafficBuchi(const_Automaton model);
 
+        //Model verification
         static void spotVerify(const_Kripke model, const std::string formula);
         static void spotVerify(const_Kripke model, explicit_Automaton neg_formula);
         static void myVerify(const_Kripke model, const std::string formula);
@@ -58,6 +63,7 @@ class Checker {
     private:
         static State crossState(State a, State b);
 
+        //Wraps spot functionalitiy for building explicit Buchi automata
         static explicit_Automaton initBuchi( const_Automaton model,
                                             unsigned n,
                                             State init);

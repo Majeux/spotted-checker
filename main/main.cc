@@ -12,21 +12,20 @@ int main() {
     const proc_t N = 3;
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     std::cout << "Peterson's with N = " << (long)N << "\n___________________" << std::endl;
-    // auto pk = std::make_shared<PetersonKripke>(N, dict);
+
     auto pk = std::make_shared<MyKripke>(N, dict);
-    // spot::print_dot(std::cout, pk);
 
-    auto starvation = [=] (std::function<std::string(proc_t)> crit, std::function<std::string(proc_t)> wait) {
+    // Paramtetrized LTL formula generation
+    auto starvation = [=] (std::function<std::string(proc_t)> crit, std::function<std::string(proc_t)> wait, proc_t p) {
         std::ostringstream formula;
-        formula << "G( ";
-        for(proc_t i = 0; i < N; i++) { //starvation free: any proc_tess tthat starts waiting, gets access
-            if(i > 0)
-                formula << " || ";
 
-            formula << "(" << wait(i) << " -> F("
-                    << crit(i) << "))";
+        formula << "G(  " << wait(p) << " -> ( F(" << crit(p) << " && !" << wait(p) << ")";
+
+        for(proc_t i = 0; i < N; i++) { //starvation free: any proc_tess tthat starts waiting, gets access
+            if(i != p)
+                formula << " || F(" << wait(i) << " && F(" << crit(i) << " && !" << wait(i) << "))";
         }
-        formula << " )";
+        formula << " )  )";
         return formula.str();
     };
 
@@ -68,47 +67,47 @@ int main() {
     std::function<std::string(proc_t)> critical = std::bind(pk->critical_string, std::placeholders::_1);
     std::function<std::string(proc_t)> waiting  = std::bind(pk->waiting_string, std::placeholders::_1);
 
+    std::cout << "------------------------" << std::endl
+              << "------------------------" << std::endl
+              << "Spot verification" << std::endl
+              << "------------------------" << std::endl
+              << "------------------------" << std::endl;
+
     std::cout << "MUTEX" << std::endl;
     Checker::spotVerify( pk, mutex(critical) );
-    //
-    // std::cout << "STARVE" << std::endl;
-    // Checker::spotVerify( pk, starvation(critical, waiting) );
-    //
-    // std::cout << "BOUNDED_WAITING" << std::endl;
-    // Checker::spotVerify( pk, bounded_waiting(critical, waiting) );
-    //
-    // std::cout << "DOUBLE CRIT" << std::endl;
-    // Checker::spotVerify( pk, "F(crit0 && crit 1)");
-    //
-    // std::cout << "------------------------" << std::endl
-    //           << "MY TURN" << std::endl
-    //           << "------------------------" << std::endl;
+
+    std::cout << "STARVE" << std::endl;
+    for(proc_t i = 0; i < N; i++)
+        Checker::spotVerify( pk, starvation(critical, waiting, i) );
+
+    //NOTE this should only hold for N=2
+    std::cout << "BOUNDED_WAITING" << std::endl;
+    Checker::spotVerify( pk, bounded_waiting(critical, waiting) );
+
+    //NOTE should never hold
+    std::cout << "DOUBLE CRIT" << std::endl;
+    Checker::spotVerify( pk, "F(crit0 && crit 1)");
+
+    std::cout << "------------------------" << std::endl
+              << "------------------------" << std::endl
+              << "CrossProduct verification" << std::endl
+              << "------------------------" << std::endl
+              << "------------------------" << std::endl;
 
     std::cout << "MUTEX" << std::endl;
     Checker::myVerify( pk, mutex(critical) );
-    //
-    // std::cout << "STARVE" << std::endl;
-    // Checker::myVerify( pk, starvation(critical, waiting) );
-    Checker::myVerify( pk, "G(  (wait0 -> ( F(crit0 && !wait0) || (F(wait1 && F(crit1 && !wait1))) || (F(wait2 && F(crit2 && !wait2))) ) )"); //" && (wait1 -> ( F(crit0 && !wait0) || F(crit1 && !wait1) || F(crit2 && !wait2) ) ) && (wait2 -> ( F(crit0 && !wait0) || F(crit1 && !wait1) || F(crit2 && !wait2) ) ) )" );
 
-    // Checker::myVerify( pk, "G( wait0 -> (wait0 W crit0) && wait1 -> (wait1 W crit1) && wait2 -> (wait2 W crit2)) )" );
-    //
-    // std::cout << "BOUNDED_WAITING" << std::endl;
-    // Checker::myVerify( pk, bounded_waiting(critical, waiting) );
-    //
-    // std::cout << "DOUBLE CRIT" << std::endl;
-    // Checker::myVerify( pk, "F(crit0 && crit 1)");
+    std::cout << "STARVE" << std::endl;
+    for(proc_t i = 0; i < N; i++)
+        Checker::myVerify( pk, starvation(critical, waiting, i) );
 
-    // auto traffic = Checker::explicit_traffic();
-    // auto traffic_buchi = Checker::defineTrafficBuchi(traffic);
-    //
-    // CrossProduct cross(traffic, traffic_buchi);
-    //
-    // std::stack< state_pair > s = cross();
-    // //
-    // std::cerr << s.size() << std::endl;
-    // //
-    // cross.trace();
+    //NOTE this should only hold for N=2
+    std::cout << "BOUNDED_WAITING" << std::endl;
+    Checker::myVerify( pk, bounded_waiting(critical, waiting) );
+
+    //NOTE should never hold
+    std::cout << "DOUBLE CRIT" << std::endl;
+    Checker::myVerify( pk, "F(crit0 && crit 1)");
 
     return 1;
 }
