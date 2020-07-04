@@ -1,4 +1,0 @@
-N_STATES(unsigned int) INITIAL_STATE( {0, N_STATES-1} )
-SYMBOLS(string*)
-LABELS     ( { {0,1}^length(SYMBOLS) }^N_STATES )
-TRANSITIONS( { {0, N_STATES-1}*      }^N_STATES )
