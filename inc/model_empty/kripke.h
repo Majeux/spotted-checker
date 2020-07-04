@@ -11,7 +11,8 @@
 class ModelKripke: public AbstractKripke {
     private:
         /*  TODO
-            Represent properties of a state using 'bdd' variables
+            Represent each of the atomic propositions (AP) as 'bdd' variables.
+            These
         */
         bdd some_property;
         bdd other_property;
@@ -32,7 +33,7 @@ class ModelKripke: public AbstractKripke {
         ModelState* get_init_state() const override;
 
         /*  TODO
-            Return the combined condition of the given state
+            Return the label of the given state using the AP
         */
         bdd state_condition(const spot::state* s) const override;
 

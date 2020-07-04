@@ -5,7 +5,9 @@
 #include "model_empty/state.h"
 
 /*  This class will iterate over all outgoing transitions from a sv. The state we
-    consider is defined by the pointer passed at construction.
+    consider is defined by the pointer passed at construction. In order to get
+    all states in next(s), one should:
+    call Iterator->first() and then call next() and dst() until no successors remain.
 */
 class ModelIterator : public AbstractIterator {
     private:
