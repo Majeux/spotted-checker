@@ -284,7 +284,6 @@ void CrossProduct::trace() {
 
         std::cout << A_->format_state(s) << " | ";
         spot::bdd_print_formula(std::cout, A_->get_dict(), A_->state_condition(s));
-        std::cout << std::endl << B_->format_state(c_print.top().b_) << " = buchi state" << std::endl;
         std::cout << std::endl << "\t------>" << std::endl;
 
         c_print.pop();

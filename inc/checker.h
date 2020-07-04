@@ -43,14 +43,17 @@ struct model_info {
 class Checker {
     public:
         Checker();
-        //Making explicit Kripke models
+
+        //Easily build a kripke structuer by filling in model_info object
         static explicit_Kripke make_explicit(const model_info& m);
+        //Examples of explicit model construction using Spot
         static explicit_Kripke explicit_door_kripke();
         static const_Kripke explicit_traffic();
         static const_Kripke explicit_traffic2();
 
-        //Making explicit property buchi automata
+        //Template for easily building a Buchi automaton
         static explicit_Automaton defineBuchi(const_Automaton model);
+        //Examples of explicit Buchi
         static explicit_Automaton defineMutex3(const_Automaton model);
         static explicit_Automaton defineTrafficBuchi(const_Automaton model);
 
@@ -64,6 +67,7 @@ class Checker {
         static State crossState(State a, State b);
 
         //Wraps spot functionalitiy for building explicit Buchi automata
+        //To be used by defineBuchi like function
         static explicit_Automaton initBuchi( const_Automaton model,
                                             unsigned n,
                                             State init);

@@ -38,94 +38,68 @@ Checker::Checker() {
     std::cerr << "-- create Checker" << std::endl;
 }
 
-/*  Creates a small explicit model: push a button -> opens a door -> walk through
+/*  Example Creates a small explicit model: push a button -> opens a door -> walk through
     the door. Used for testing. */
 explicit_Kripke Checker::explicit_door_kripke() {
-    spot::bdd_dict_ptr dict = spot::make_bdd_dict();
-    explicit_Kripke k = spot::make_kripke_graph(dict);
+    model_info model;
+    model.States = 3;
+    model.Initial = 0;
+    model.Symbols = {"open", "pushed", "through"};
 
-    bdd open    = bdd_ithvar(k->register_ap("open"));
-    bdd pushed  = bdd_ithvar(k->register_ap("pushed"));
-    bdd through = bdd_ithvar(k->register_ap("through"));
+    model.Labels = { {0, 0, 0},
+                     {1, 1, 0},
+                     {1, 1, 1} };
 
-    unsigned x0 = k->new_state((!open) & (!pushed) & !through);
-    unsigned x1 = k->new_state(  open &    pushed & !through);
-    unsigned x2 = k->new_state(  open &    pushed & through);
+    model.Transitions = { {0, 1},
+                          {0, 1, 2},
+                          {1, 2} };
 
-    k->set_init_state(x0);
-
-    k->new_edge(x0, x0);
-    k->new_edge(x0, x1);
-
-    k->new_edge(x1, x1);
-    k->new_edge(x1, x0);
-    k->new_edge(x1, x2);
-
-    k->new_edge(x2, x2);
-    k->new_edge(x2, x1);
-
-    auto names = new std::vector<std::string> { "x0", "x1", "x2" };
-    k->set_named_prop("state-names", names);
-
-    return k;
+    return make_explicit(model);
 }
 
-/*  Creates a small explicit model: Traffic light, either red or green
+/*  Example: Creates a small explicit model: Traffic light, either red or green
     Used for testing. */
 const_Kripke Checker::explicit_traffic() {
-    spot::bdd_dict_ptr dict = spot::make_bdd_dict();
-    explicit_Kripke k = spot::make_kripke_graph(dict);
+    model_info model;
+    model.States = 2;
+    model.Initial = 0;
+    model.Symbols = {"red", "green"};
 
-    bdd red    = bdd_ithvar(k->register_ap("red"));
-    bdd green  = bdd_ithvar(k->register_ap("green"));
+    model.Labels = { {1, 0},
+                     {0, 1} };
 
-    unsigned x0 = k->new_state(red);
-    unsigned x1 = k->new_state(green);
+    model.Transitions = { {1},
+                          {0} };
 
-    k->set_init_state(x0);
-
-    k->new_edge(x0, x1);
-
-    k->new_edge(x1, x0);
-
-    auto names = new std::vector<std::string> { "s0", "s1" };
-    k->set_named_prop("state-names", names);
-
-    return k;
+    return make_explicit(model);
 }
 
-/*  Creates a small explicit model: Traffic light, either off, red or green
+/*  Example: Creates a small explicit model: Traffic light, either off, red or green
     Used for testing. */
 const_Kripke Checker::explicit_traffic2() {
-    spot::bdd_dict_ptr dict = spot::make_bdd_dict();
-    explicit_Kripke k = spot::make_kripke_graph(dict);
+    model_info model;
+    model.States = 3;
+    model.Initial = 0;
+    model.Symbols = {"red", "green"};
 
-    bdd False  = bdd();
-    bdd red    = bdd_ithvar(k->register_ap("red"));
-    bdd green  = bdd_ithvar(k->register_ap("green"));
+    model.Labels = { {1, 0},
+                     {0, 1},
+                     {0, 0} };
 
-    unsigned x0 = k->new_state(red);
-    unsigned x1 = k->new_state(green);
-    unsigned x2 = k->new_state((!red) & (!green));
+    model.Transitions = { {1, 2},
+                          {0},
+                          {0} };
 
-    k->set_init_state(x0);
-
-    k->new_edge(x0, x1);
-
-    k->new_edge(x1, x0);
-
-    k->new_edge(x0, x2);
-    k->new_edge(x2, x0);
-
-    auto names = new std::vector<std::string> { "s0", "s1", "s2" };
-    k->set_named_prop("state-names", names);
-
-    return k;
+    return make_explicit(model);
 }
 
 /*  Create a Kripke graph from a specified model using the 'Explicit' method
     Abstracts a Spot functionality */
 explicit_Kripke Checker::make_explicit(const model_info& m) {
+    assert(m.States == m.Transitions.size());
+    assert(m.States == m.Labels.size());
+    assert(m.Initial < m.States);
+
     spot::bdd_dict_ptr dict = spot::make_bdd_dict();
     spot::kripke_graph_ptr graph = spot::make_kripke_graph(dict);
 
@@ -138,10 +112,13 @@ explicit_Kripke Checker::make_explicit(const model_info& m) {
 
     // Assign labels to states
     for(State s = 0; s < m.Labels.size(); s++) {
-        auto temp = m.Labels[s][0] ? symbols[0] : !(symbols[0]);
+        assert(m.Labels[0].size() == m.Symbols.size());
+        bdd temp = m.Labels[s][0] ? symbols[0] : !(symbols[0]);
 
-        for(uint32_t i = 1; i < m.Labels[0].size(); i++)
+        for(uint32_t i = 1; i < m.Labels[0].size(); i++) {
+            assert(m.Labels[i].size() == m.Symbols.size());
             temp &= m.Labels[s][i] ? symbols[i] : (!symbols[i]);
+        }
 
         states[s] = graph->new_state(temp);
     }
@@ -275,18 +252,20 @@ explicit_Automaton Checker::defineMutex3(const_Automaton model) {
     return buildBuchi(automata, accepting_states, edges);
 }
 
+/*  Example, complement of:
+    if light ever turns off green, it will eventually be green again */
 explicit_Automaton Checker::defineTrafficBuchi(const_Automaton model) {
     unsigned n_states       = 3;
     State initial_state     = 0;
     std::vector<State> accepting_states = { 1 };
 
-    explicit_Automaton automata = initBuchi(model, n_states, initial_state);
+    explicit_Automaton automaton = initBuchi(model, n_states, initial_state);
 
     bdd True = !bdd();
     bdd False = bdd();
 
-    bdd red = bdd_ithvar(automata->register_ap("red") );
-    bdd green = bdd_ithvar(automata->register_ap("green") );
+    bdd red = bdd_ithvar(automaton->register_ap("red") );
+    bdd green = bdd_ithvar(automaton->register_ap("green") );
 
     std::vector<Edge> edges =
     {
@@ -297,7 +276,7 @@ explicit_Automaton Checker::defineTrafficBuchi(const_Automaton model) {
         { 2, 2, True}
     };
 
-    return buildBuchi(automata, accepting_states, edges);
+    return buildBuchi(automaton, accepting_states, edges);
 }
 
 /*  TODO Template for defining an explicit Buchi automata representing
@@ -306,7 +285,7 @@ explicit_Automaton Checker::defineBuchi(const_Automaton model) {
     //TODO define states used
     unsigned n_states; //numbered from 0 ... n-1
 
-    //TODO define an initial state
+    //TODO define an initial state (unsigned integer)
     State initial_state;
 
     //TODO define accepting states
@@ -333,5 +312,6 @@ explicit_Automaton Checker::defineBuchi(const_Automaton model) {
         /* ... */
     };
 
+    //build automata structure using the edges
     return buildBuchi(automata, accepting_states, edges);
 }
