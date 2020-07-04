@@ -9,12 +9,6 @@ class MyState : public AbstractState {
         /*  Universal/internal variables (among states) */
         const proc_t _N;
 
-        /*  This class has access to the identifying variables (defined in state_vars.h) through the 'state_variables state' member in AbstractState */
-
-        //Access variable 'NAME' with:               sv.singles[NAME]
-        //Access element 'i' in array 'NAME' with:   sv.arrays[NAME][i]
-        //Get the size pf array 'NAME' with:         sv.indices[NAME]
-
     public:
         MyState(bound_t n);
         MyState(const MyState* s);

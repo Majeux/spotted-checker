@@ -24,11 +24,7 @@ class ModelKripke: public AbstractKripke {
         AbstractIterator* makeIterator(const spot::state* s, bdd condition) const override;
 
     public:
-        ModelKripke(const spot::bdd_dict_ptr& d) : AbstractKripke(d) {
-            //TODO
-            some_property = bdd_ithvar( register_ap("some_name") );
-            some_property = bdd_ithvar( register_ap("other_name") );
-        }
+        ModelKripke(const spot::bdd_dict_ptr& d);
 
         /*  TODO
             Construct and return the initial state of the model

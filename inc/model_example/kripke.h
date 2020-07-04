@@ -7,8 +7,8 @@
 class MyKripke: public AbstractKripke {
     private:
         const proc_t _N;
-        bdd* crit; //is proc_tess i < _N in critical section (for verifying mutex)
-        bdd* wait; //is proc_tess i < _N waiting to access critical section (for verifying non-starvation)
+        bdd* crit; //process is in critical section if pc[i] = 4
+        bdd* wait; //process is waiting if pc[i] != 4 and level[i] < 0
 
         AbstractIterator* makeIterator(const spot::state* s, bdd condition) const override;
 
