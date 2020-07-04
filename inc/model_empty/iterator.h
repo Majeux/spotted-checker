@@ -4,54 +4,46 @@
 #include "model_abstract/iterator.h"
 #include "model_empty/state.h"
 
-/*  This class will iterate over all outgoing edges from a sv. The state we
+/*  This class will iterate over all outgoing transitions from a sv. The state we
     consider is defined by the pointer passed at construction.
 */
 class ModelIterator : public AbstractIterator {
     private:
         /*  TODO
-            Define variables that are invariant among or independent of a State
-            here as normal.
-        */
+            Define variables that are invariant among states or independent
+            of a state as normal.
 
-        /*  This class contains identifying variables (of type proc_t) for a state
-            TODO define them in state_vars.h
-            Access them through the 'AbstractIterator::state' member
-        */
+            TODO define variables that uniquely identify a state in state_vars.h
+            by listing their names
 
-        /*  Access a variable 'NAME' with: */
-                //state.singles[NAME] = 0;
-                //proc_t x = sv.singles[NAME] + 1;
-
-        /*  Access an element 'i' in array 'NAME' with: */
-                //state.arrays[NAME][i] = 0;
-                //proc_t x = sv.arrays[NAME][i] + 1;
-
-        /*  Get the size pf array 'NAME' with: */
-                //state.indices[NAME]
+            NOTE from AbstractIterator:
+            state_variables sv;
+            Use underlying state variables as shown in inc/aux.h */
 
     public:
         ModelIterator(const ModelState* s, bdd cond) : AbstractIterator(s, cond) { }
 
         /*  TODO
-            Initialize the iteratorto consider the first edge (if it exists)
+            Initialize the iterator to consider the first edge from the state
+            describe by sv (if it exists)
             Return true if there are any successors
         */
         bool first() override;
 
         /*  TODO
-            Advance the iterator by one
+            Advance the iterator to output the next successor on the next dts() call
             Return true if there are any more successors afterwards */
         bool next() override;
 
         /*  TODO
-            Return true if there are no more edges to be considered
+            Return true if there are no more transitions to be considered
         */
         bool done() const override;
 
         /*  TODO
             Return a new state corresponding to the edge that
             the iterator is currently considering
+            Deletion is the responsibility of the caller
         */
         AbstractState* dst() const override;
 };

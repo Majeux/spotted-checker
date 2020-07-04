@@ -45,11 +45,11 @@ class Checker {
         Checker();
 
         //Easily build a kripke structuer by filling in model_info object
-        static explicit_Kripke make_explicit(const model_info& m);
+        static explicit_Kripke makeExplicit(const model_info& m);
         //Examples of explicit model construction using Spot
-        static explicit_Kripke explicit_door_kripke();
-        static const_Kripke explicit_traffic();
-        static const_Kripke explicit_traffic2();
+        static explicit_Kripke explicitDoor();
+        static const_Kripke explicitTraffic();
+        static const_Kripke explicitTraffic2();
 
         //Template for easily building a Buchi automaton
         static explicit_Automaton defineBuchi(const_Automaton model);

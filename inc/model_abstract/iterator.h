@@ -17,8 +17,7 @@ class AbstractIterator: public spot::kripke_succ_iterator {
             kripke_succ_iterator(cond), sv(s->getStateVars()) { }
 
         /*  Repurpose an existing iterator for another state
-            Avoids additional new/delete
-        */
+            Avoids additional new/delete */
         void recycle(const AbstractState* s, bdd cond) {
             //other variables are invariant among iterators
             //or are auxiliary

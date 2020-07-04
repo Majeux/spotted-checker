@@ -40,7 +40,7 @@ Checker::Checker() {
 
 /*  Example Creates a small explicit model: push a button -> opens a door -> walk through
     the door. Used for testing. */
-explicit_Kripke Checker::explicit_door_kripke() {
+explicit_Kripke Checker::explicitDoor() {
     model_info model;
     model.States = 3;
     model.Initial = 0;
@@ -54,12 +54,12 @@ explicit_Kripke Checker::explicit_door_kripke() {
                           {0, 1, 2},
                           {1, 2} };
 
-    return make_explicit(model);
+    return makeExplicit(model);
 }
 
 /*  Example: Creates a small explicit model: Traffic light, either red or green
     Used for testing. */
-const_Kripke Checker::explicit_traffic() {
+const_Kripke Checker::explicitTraffic() {
     model_info model;
     model.States = 2;
     model.Initial = 0;
@@ -71,12 +71,12 @@ const_Kripke Checker::explicit_traffic() {
     model.Transitions = { {1},
                           {0} };
 
-    return make_explicit(model);
+    return makeExplicit(model);
 }
 
 /*  Example: Creates a small explicit model: Traffic light, either off, red or green
     Used for testing. */
-const_Kripke Checker::explicit_traffic2() {
+const_Kripke Checker::explicitTraffic2() {
     model_info model;
     model.States = 3;
     model.Initial = 0;
@@ -90,12 +90,12 @@ const_Kripke Checker::explicit_traffic2() {
                           {0},
                           {0} };
 
-    return make_explicit(model);
+    return makeExplicit(model);
 }
 
 /*  Create a Kripke graph from a specified model using the 'Explicit' method
     Abstracts a Spot functionality */
-explicit_Kripke Checker::make_explicit(const model_info& m) {
+explicit_Kripke Checker::makeExplicit(const model_info& m) {
     assert(m.States == m.Transitions.size());
     assert(m.States == m.Labels.size());
     assert(m.Initial < m.States);

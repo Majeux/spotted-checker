@@ -4,6 +4,10 @@
 #include "model_abstract/kripke.h"
 #include "model_empty/iterator.h"
 
+/*  This class will combine the ModelState and ModelIterator classes to define
+    the full Kripke structure. It performs state labeling, creating an initial
+    state and allocation of state successor iterators.
+*/
 class ModelKripke: public AbstractKripke {
     private:
         /*  TODO
