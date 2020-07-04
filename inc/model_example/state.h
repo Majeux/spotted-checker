@@ -4,6 +4,22 @@
 #include "model_abstract/state.h"
 #include "model_example/state_vars.h"
 
+//small struct to hold values to be assigned
+struct assignment {
+    int array; //to hold either SINGLE_VARS or ARRAY_VARS
+    proc_t index;
+    proc_t value;
+
+    assignment() : array(-1), index(0), value(0) { }
+    assignment(int a) : array(a) { }
+    assignment(int a, proc_t i, proc_t v) : array(a), index(i), value(v) { }
+
+    void set(const proc_t i, proc_t v) {
+        index = i;
+        value = v;
+    }
+};
+
 class MyState : public AbstractState {
     private:
         /*  Universal/internal variables (among states) */

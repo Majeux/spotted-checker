@@ -1,10 +1,8 @@
 #include <iostream>
 #include <functional>
 
-#include "dbg.h"
 #include "checker.h"
-#include "peterson/kripke.h" //PetersonKripke
-#include "model_example/kripke.h" //MyKripke
+#include "model_example/kripke.h"
 
 int main() {
     Checker checker;
